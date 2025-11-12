@@ -5,20 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Name Picker</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       background-color: black;
       color: white;
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      display: block;
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
-      box-sizing: border-box;
-      padding-bottom: 220px; /* space for bottom menu */
     }
-    .container {
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
       text-align: center;
-      padding-top: 50px;
     }
     button.pick {
       padding: 30px 60px;
@@ -35,19 +41,15 @@
       margin-bottom: 20px;
     }
     #menu {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
       background-color: #222;
       padding: 10px;
-      max-height: 200px;
-      overflow-y: auto;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      box-sizing: border-box;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+      max-height: 200px;
+      overflow-y: auto;
     }
     .name-item {
       padding: 5px 10px;
@@ -55,6 +57,7 @@
       display: flex;
       align-items: center;
       gap: 5px;
+      font-size: 14px;
     }
     .name-item button {
       background-color: red;
@@ -76,7 +79,7 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="content">
     <button class="pick" onclick="pickName()">Pick a Name</button>
     <div id="name"></div>
   </div>
@@ -124,7 +127,7 @@
           const btn = document.createElement("button");
           btn.textContent = "Remove";
           btn.onclick = (e) => { 
-            e.stopPropagation();
+            e.stopPropagation(); // prevents undo when clicking button
             removeName(name);
           };
           div.appendChild(btn);
