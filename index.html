@@ -1,1 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Name Picker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: block;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+    button.pick {
+      padding: 30px 60px;
+      font-size: 24px;
+      background-color: green;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    #name {
+      font-size: 28px;
+      margin-bottom: 40px;
+      min-height: 34px; /* prevents content jump */
+    }
+    #menu {
+      width: 100%;
+      background-color: #222;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+      position: relative; /* normal flow */
+    }
+    .name-item {
+      padding: 5px 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      cursor: default;
+    }
+    .name-item button {
+      background-color: red;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .active {
+      background-color: #444;
+    }
+    .removed {
+      background-color: #666;
+      color: #aaa;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="pick" onclick="pickName()">Pick a Name</button>
+    <div id="name"></div>
+  </div>
 
+  <div id="menu"></div>
+
+  <script>
+    const names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+    let removedNames = [];
+
+    function pickName() {
+      const available = names.filter(n => !removedNames.includes(n));
+      const nameDisplay = document.getElementById("name");
+      if (available.length === 0) {
+        nameDisplay.textContent = "No names left!";
+        return;
+      }
+      const index = Math.floor(Math.random() * available.length);
+      nameDisplay.textContent = available[index];
+    }
+
+    function removeName(name) {
+      if (!removedNames.includes(name)) {
+        removedNames.push(name);
+        renderMenu();
+      }
+    }
+
+    function undoRemove(name) {
+      removedNames = removedNames.filter(n => n !== name);
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const menu = document.getElementById("menu");
+      menu.innerHTML = "";
+      names.forEach(name => {
+        const div = document.createElement("div");
+        if (removedNames.includes(name)) {
+          div.className = "name-item removed";
+          div.textContent = name;
+          div.onclick = () => undoRemove(name);
+        } else {
+          div.className = "name-item active";
+          div.textContent = name;
+          const btn = document.createElement("button");
+          btn.textContent = "Remove";
+          btn.onclick = e => { 
+            e.stopPropagation(); 
+            removeName(name); 
+          };
+          div.appendChild(btn);
+        }
+        menu.appendChild(div);
+      });
+    }
+
+    renderMenu();
+  </script>
+</body>
+</html>
