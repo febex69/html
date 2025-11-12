@@ -9,14 +9,16 @@
       background-color: black;
       color: white;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
-      padding-bottom: 220px; /* make space for menu */
+      padding: 0;
+      display: block;
+      min-height: 100vh;
       box-sizing: border-box;
+      padding-bottom: 220px; /* space for bottom menu */
+    }
+    .container {
+      text-align: center;
+      padding-top: 50px;
     }
     button.pick {
       padding: 30px 60px;
@@ -53,7 +55,6 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      cursor: default;
     }
     .name-item button {
       background-color: red;
@@ -75,8 +76,10 @@
   </style>
 </head>
 <body>
-  <button class="pick" onclick="pickName()">Pick a Name</button>
-  <div id="name"></div>
+  <div class="container">
+    <button class="pick" onclick="pickName()">Pick a Name</button>
+    <div id="name"></div>
+  </div>
 
   <div id="menu"></div>
 
@@ -121,7 +124,7 @@
           const btn = document.createElement("button");
           btn.textContent = "Remove";
           btn.onclick = (e) => { 
-            e.stopPropagation(); // prevent triggering div click
+            e.stopPropagation();
             removeName(name);
           };
           div.appendChild(btn);
