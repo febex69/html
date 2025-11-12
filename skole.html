@@ -1,0 +1,89 @@
+<!doctype html>
+}
+
+
+// Konverter skærmkoordinater til canvas-koordinater (taking into account DPR and canvas position)
+function screenToCanvasCoords(x, y){
+// canvas is full viewport and uses CSS pixels for ctx transform
+return { x: x, y: y };
+}
+
+
+// animation loop
+function update(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+
+for(let i = particles.length-1; i >= 0; i--){
+const p = particles[i];
+// fysik
+p.vy += 0.15; // gravity
+p.vx *= 0.995; // luftmodstand
+p.x += p.vx;
+p.y += p.vy;
+p.age++;
+
+
+// rotation/tilt effect
+const wobble = Math.sin(p.age * 0.2 + p.tilt*10) * 4;
+
+
+// fade out mod slutningen
+const alpha = Math.max(0, 1 - p.age / p.life);
+
+
+ctx.save();
+ctx.globalAlpha = alpha;
+
+
+// draw as rounded rectangle / confetti strip
+ctx.translate(p.x, p.y);
+ctx.rotate(wobble * Math.PI/180);
+ctx.fillStyle = p.color;
+ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*1.8);
+ctx.restore();
+
+
+// fjern hvis levetid slut
+if(p.age >= p.life || p.y > canvas.height + 50) particles.splice(i,1);
+}
+
+
+requestAnimationFrame(update);
+}
+
+
+requestAnimationFrame(update);
+
+
+// trigger når 'p' trykkes (case-insensitiv)
+window.addEventListener('keydown', (e) => {
+if(e.key && e.key.toLowerCase() === 'p'){
+const center = getButtonCenter();
+const coords = screenToCanvasCoords(center.x, center.y);
+spawnConfetti(coords.x, coords.y, 100);
+}
+});
+
+
+// også trigger ved klik på knappen
+btn.addEventListener('click', (ev) => {
+const center = getButtonCenter();
+const coords = screenToCanvasCoords(center.x, center.y);
+spawnConfetti(coords.x, coords.y, 100);
+});
+
+
+// lille forbedring: klik midt på knappen sender confetti fra det punktet
+btn.addEventListener('mousedown', (ev) => {
+const coords = screenToCanvasCoords(ev.clientX, ev.clientY);
+spawnConfetti(coords.x, coords.y, 70);
+});
+
+
+// når siden først indlæses kan canvas' størrelse være 0 før CSS er regnet; sørg for at resize igen efter load
+window.addEventListener('load', resize);
+})();
+</script>
+</body>
+</html>
