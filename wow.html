@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Name Picker</title>
+  <title>Modern Random Name Picker</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -21,19 +21,21 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
       padding: 20px;
+      text-align: center;
     }
     .pick-button {
       background-color: #28a745;
       color: white;
       border: none;
-      border-radius: 15px;
+      border-radius: 20px;
       padding: 30px 60px;
       font-size: 2rem;
       cursor: pointer;
       transition: transform 0.2s, background 0.2s;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
     }
     .pick-button:hover {
       background-color: #3cd153;
@@ -46,8 +48,8 @@
       min-height: 50px;
     }
     #menu {
-      background: rgba(20, 20, 30, 0.95);
-      backdrop-filter: blur(10px);
+      background: rgba(30, 30, 40, 0.95);
+      backdrop-filter: blur(12px);
       padding: 15px;
       display: flex;
       flex-wrap: wrap;
@@ -55,21 +57,23 @@
       gap: 10px;
       max-height: 220px;
       overflow-y: auto;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      box-shadow: 0 -8px 20px rgba(0,0,0,0.5);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+      margin: 0 20px 20px 20px;
+      transition: all 0.3s ease;
     }
     .name-item {
       padding: 8px 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       gap: 5px;
       font-size: 0.95rem;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
     .name-item:hover {
       transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
     .name-item button {
       background-color: #dc3545;
@@ -84,13 +88,32 @@
     .name-item button:hover {
       background-color: #ff5a69;
     }
-    .active {
-      background-color: #444;
+    .active { background-color: #444; }
+    .removed { background-color: #666; color: #aaa; cursor: pointer; }
+    .highlight {
+      animation: glow 0.6s ease-in-out;
     }
-    .removed {
-      background-color: #666;
-      color: #aaa;
-      cursor: pointer;
+    @keyframes glow {
+      0% { box-shadow: 0 0 0px #fff; transform: scale(1); }
+      50% { box-shadow: 0 0 15px #fff; transform: scale(1.1); }
+      100% { box-shadow: 0 0 0px #fff; transform: scale(1); }
+    }
+    /* Confetti particles */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #fff;
+      pointer-events: none;
+      opacity: 0.8;
+      border-radius: 50%;
+      animation: fall 1s forwards;
+    }
+    @keyframes fall {
+      to {
+        transform: translate(var(--x,0px), var(--y,100px)) rotate(var(--r,0deg));
+        opacity: 0;
+      }
     }
   </style>
 </head>
@@ -114,7 +137,10 @@
         return;
       }
       const index = Math.floor(Math.random() * available.length);
-      display.textContent = available[index];
+      const picked = available[index];
+      display.textContent = picked;
+      highlightPicked(picked);
+      createConfetti();
     }
 
     function removeName(name) {
@@ -143,14 +169,34 @@
           div.textContent = name;
           const btn = document.createElement("button");
           btn.textContent = "Remove";
-          btn.onclick = e => {
-            e.stopPropagation();
-            removeName(name);
-          };
+          btn.onclick = e => { e.stopPropagation(); removeName(name); };
           div.appendChild(btn);
         }
         menu.appendChild(div);
       });
+    }
+
+    function highlightPicked(name) {
+      const items = document.querySelectorAll("#menu .name-item");
+      items.forEach(item => {
+        if (item.textContent.includes(name)) {
+          item.classList.add("highlight");
+          setTimeout(() => item.classList.remove("highlight"), 600);
+        }
+      });
+    }
+
+    function createConfetti() {
+      const button = document.querySelector(".pick-button");
+      for (let i = 0; i < 20; i++) {
+        const conf = document.createElement("div");
+        conf.classList.add("confetti");
+        conf.style.setProperty('--x', `${Math.random()*200-100}px`);
+        conf.style.setProperty('--y', `${Math.random()*200-100}px`);
+        conf.style.setProperty('--r', `${Math.random()*360}deg`);
+        button.appendChild(conf);
+        setTimeout(() => conf.remove(), 1000);
+      }
     }
 
     renderMenu();
