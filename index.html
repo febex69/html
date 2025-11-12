@@ -1,143 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Name Picker</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hotline-ish — Top-down Shooter</title>
   <style>
-    * {
-      box-sizing: border-box;
+    html,body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      background: linear-gradient(180deg,#05050a,#0b0b0f);
+      color: #e6e6e6;
+      font-family: Inter, Segoe UI, Roboto, Arial;
+      overflow: hidden;
     }
     body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      display: block;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-    }
-    button.pick {
-      padding: 30px 60px;
-      font-size: 24px;
-      background-color: green;
-      color: white;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    #name {
-      font-size: 28px;
-      margin-bottom: 40px;
-      min-height: 34px; /* prevents content jump */
-    }
-    #menu {
-      width: 100%;
-      background-color: #222;
-      padding: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      max-height: 200px;
-      overflow-y: auto;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
-      position: relative; /* normal flow */
-    }
-    .name-item {
-      padding: 5px 10px;
-      border-radius: 10px;
       display: flex;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
+      position: relative;
+    }
+    canvas {
+      background: #07070b;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+      border: 6px solid rgba(255,255,255,0.02);
+      image-rendering: pixelated;
+      display: block;
+    }
+    .hud {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      color: #e6e6e6;
       font-size: 14px;
-      cursor: default;
+      z-index: 5;
     }
-    .name-item button {
-      background-color: red;
-      border: none;
-      border-radius: 5px;
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+    .menu-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 24px 32px;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+    .title { font-size: 26px; color: #ff2d95; margin-bottom: 8px; }
+    .subtitle { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 16px; }
+    .btn {
+      background: none;
+      border: 2px solid rgba(255,255,255,0.4);
       color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
       cursor: pointer;
-      padding: 2px 6px;
-      font-size: 12px;
+      font-size: 14px;
+      transition: all 0.2s;
     }
-    .active {
-      background-color: #444;
-    }
-    .removed {
-      background-color: #666;
-      color: #aaa;
-      cursor: pointer;
-    }
+    .btn:hover { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="pick" onclick="pickName()">Pick a Name</button>
-    <div id="name"></div>
+  <canvas id="game" width="960" height="640"></canvas>
+  <div class="hud">
+    <div>Liv: <span id="hp">100</span></div>
+    <div>Point: <span id="score">0</span></div>
+    <div>Våben: <span id="weapon">Pistol</span></div>
   </div>
 
-  <div id="menu"></div>
+  <div class="overlay" id="menu">
+    <div class="menu-box">
+      <div class="title">Hotline-ish</div>
+      <div class="subtitle">Top-down neon shooter — WASD for bevægelse, mus for at sigte, klik for at skyde</div>
+      <button class="btn" id="startBtn">Start spil</button>
+      <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.6)">R = restart • Space = melee</div>
+    </div>
+  </div>
 
-  <script>
-    const names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
-    let removedNames = [];
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const HUD={hp:document.getElementById("hp"),score:document.getElementById("score"),weapon:document.getElementById("weapon")};
+const menu=document.getElementById("menu");
+const startBtn=document.getElementById("startBtn");
+let W=canvas.width,H=canvas.height,keys={},mouse={x:0,y:0,down:false};
+let player,bullets,enemies,walls,score,gameOver,lastShotTime;
 
-    function pickName() {
-      const available = names.filter(n => !removedNames.includes(n));
-      const nameDisplay = document.getElementById("name");
-      if (available.length === 0) {
-        nameDisplay.textContent = "No names left!";
-        return;
-      }
-      const index = Math.floor(Math.random() * available.length);
-      nameDisplay.textContent = available[index];
+window.addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()]=true;
+  if(e.key==="r")initGame();
+  if(e.code==="Space")player.melee();
+});
+window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
+canvas.addEventListener("mousemove",e=>{
+  const r=canvas.getBoundingClientRect();
+  mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;
+});
+canvas.addEventListener("mousedown",()=>mouse.down=true);
+window.addEventListener("mouseup",()=>mouse.down=false);
+
+function initGame(){
+  menu.style.display="none";
+  player={x:W/2,y:H/2,r:12,speed:2.4,hp:100,color:"#ff2d95",meleeCooldown:0,
+    melee(){if(this.meleeCooldown>0)return;this.meleeCooldown=30;
+      enemies.forEach(e=>{if(dist(this.x,this.y,e.x,e.y)<40){e.hp-=40;if(e.hp<=0)e.dead=true;score+=25}})}};
+  bullets=[];enemies=[];walls=generateWalls();score=0;gameOver=false;lastShotTime=0;
+  HUD.hp.textContent=player.hp;HUD.score.textContent=score;HUD.weapon.textContent="Pistol";
+  for(let i=0;i<6;i++)spawnEnemy();
+}
+
+function generateWalls(){return[
+  {x:120,y:80,w:200,h:24},
+  {x:520,y:120,w:24,h:200},
+  {x:260,y:360,w:420,h:24},
+  {x:760,y:220,w:24,h:280},
+  {x:40,y:520,w:150,h:24}
+];}
+
+function spawnEnemy(){
+  const edge=Math.floor(Math.random()*4);let x,y;
+  if(edge===0){x=20;y=randomRange(20,H-20)}
+  if(edge===1){x=W-20;y=randomRange(20,H-20)}
+  if(edge===2){x=randomRange(20,W-20);y=20}
+  if(edge===3){x=randomRange(20,W-20);y=H-20}
+  enemies.push({x,y,r:12,speed:1.2+Math.random()*0.6,hp:80+Math.random()*40,color:"#00e6ff",dead:false,attackCooldown:0});
+}
+
+function update(){
+  if(gameOver)return;
+  let dx=0,dy=0;
+  if(keys["w"])dy-=1;if(keys["s"])dy+=1;if(keys["a"])dx-=1;if(keys["d"])dx+=1;
+  if(dx||dy){const m=Math.hypot(dx,dy);dx/=m;dy/=m;}
+  tryMove(player,dx*player.speed,dy*player.speed);
+  if(mouse.down){const now=performance.now();if(now-lastShotTime>140){shootBullet();lastShotTime=now}}
+  for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];b.x+=b.vx;b.y+=b.vy;b.life--;
+    if(b.life<=0||b.x<0||b.x>W||b.y<0||b.y>H){bullets.splice(i,1);continue;}
+    for(const e of enemies){if(e.dead)continue;
+      if(dist(b.x,b.y,e.x,e.y)<e.r+2){e.hp-=b.damage;bullets.splice(i,1);
+        if(e.hp<=0){e.dead=true;score+=100;HUD.score.textContent=score;}break;}
     }
-
-    function removeName(name) {
-      if (!removedNames.includes(name)) {
-        removedNames.push(name);
-        renderMenu();
-      }
+  }
+  enemies.forEach(e=>{
+    if(e.dead)return;
+    const a=Math.atan2(player.y-e.y,player.x-e.x);
+    tryMove(e,Math.cos(a)*e.speed,Math.sin(a)*e.speed);
+    if(dist(e.x,e.y,player.x,player.y)<e.r+player.r+6&&e.attackCooldown<=0){
+      player.hp-=12;e.attackCooldown=40;
+      HUD.hp.textContent=Math.max(0,player.hp);
+      if(player.hp<=0)endGame();
     }
+    if(e.attackCooldown>0)e.attackCooldown--;
+  });
+  enemies=enemies.filter(e=>!e.dead);
+}
 
-    function undoRemove(name) {
-      removedNames = removedNames.filter(n => n !== name);
-      renderMenu();
-    }
+function endGame(){
+  gameOver=true;
+  menu.style.display="flex";
+  menu.querySelector(".title").textContent="Game Over";
+  menu.querySelector(".subtitle").textContent="Tryk Start for at spille igen";
+}
 
-    function renderMenu() {
-      const menu = document.getElementById("menu");
-      menu.innerHTML = "";
-      names.forEach(name => {
-        const div = document.createElement("div");
-        if (removedNames.includes(name)) {
-          div.className = "name-item removed";
-          div.textContent = name;
-          div.onclick = () => undoRemove(name);
-        } else {
-          div.className = "name-item active";
-          div.textContent = name;
-          const btn = document.createElement("button");
-          btn.textContent = "Remove";
-          btn.onclick = e => { 
-            e.stopPropagation(); 
-            removeName(name); 
-          };
-          div.appendChild(btn);
-        }
-        menu.appendChild(div);
-      });
-    }
+function shootBullet(){
+  const a=Math.atan2(mouse.y-player.y,mouse.x-player.x);
+  bullets.push({x:player.x+Math.cos(a)*player.r,y:player.y+Math.sin(a)*player.r,vx:Math.cos(a)*9,vy:Math.sin(a)*9,life:60,damage:34});
+}
 
-    renderMenu();
-  </script>
+function tryMove(o,vx,vy){
+  let nx=o.x+vx,ny=o.y+vy;
+  for(const w of walls){if(circleRectCollide(nx,ny,o.r,w)){
+    if(!circleRectCollide(o.x+vx,o.y,o.r,w)){nx=o.x+vx;ny=o.y;}
+    else if(!circleRectCollide(o.x,o.y+vy,o.r,w)){nx=o.x;ny=o.y+vy;}
+    else{nx=o.x;ny=o.y;}
+  }}
+  o.x=clamp(nx,o.r,W-o.r);
+  o.y=clamp(ny,o.r,H-o.r);
+}
+
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#071021");g.addColorStop(1,"#05020a");
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.globalAlpha=0.04;ctx.strokeStyle="#fff";ctx.lineWidth=1;
+  for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+  walls.forEach(w=>{ctx.fillStyle="rgba(255,255,255,0.04)";ctx.fillRect(w.x,w.y,w.w,w.h);});
+  drawCircle(player.x,player.y,player.r,player.color);
+  bullets.forEach(b=>{ctx.fillStyle="#ffd966";ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill();});
+  enemies.forEach(e=>{if(e.dead)return;drawCircle(e.x,e.y,e.r,e.color);});
+}
+
+function drawCircle(x,y,r,c){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
+function dist(a,b,c,d){return Math.hypot(a-c,b-d);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function randomRange(a,b){return Math.random()*(b-a)+a;}
+function circleRectCollide(cx,cy,cr,r){const rx=clamp(cx,r.x,r.x+r.w),ry=clamp(cy,r.y,r.y+r.h);const dx=cx-rx,dy=cy-ry;return dx*dx+dy*dy<cr*cr;}
+
+function loop(){update();draw();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+
+startBtn.addEventListener("click",()=>{initGame();});
+</script>
 </body>
 </html>
