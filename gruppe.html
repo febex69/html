@@ -14,7 +14,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       text-align: center;
       padding: 30px 10px;
@@ -35,6 +35,7 @@
       flex-direction: column;
       align-items: center;
       gap: 15px;
+      margin-bottom: 20px;
     }
 
     input[type="number"] {
@@ -61,6 +62,26 @@
     button:hover {
       background-color: #3cd153;
       transform: scale(1.05);
+    }
+
+    #nameList {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 25px;
+      max-width: 600px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     #groups {
@@ -119,12 +140,31 @@
     <button onclick="generateGroups()">Generate Groups</button>
   </div>
 
+  <div id="nameList"></div>
+
   <div id="groups"></div>
 
   <footer>All changes reset on refresh — groups are random each time.</footer>
 
   <script>
     const names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+
+    // Show all names with checkboxes
+    const nameListDiv = document.getElementById("nameList");
+    names.forEach(name => {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = name;
+      checkbox.checked = true;
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(name));
+      nameListDiv.appendChild(label);
+    });
+
+    function getActiveNames() {
+      return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
+    }
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -136,15 +176,21 @@
 
     function generateGroups() {
       const groupCount = parseInt(document.getElementById("groupCount").value);
+      const activeNames = getActiveNames();
+
+      if (activeNames.length === 0) {
+        alert("Please select at least one name!");
+        return;
+      }
+
       if (isNaN(groupCount) || groupCount < 1 || groupCount > 25) {
         alert("Please enter a number between 1 and 25.");
         return;
       }
 
-      const shuffled = shuffle([...names]);
+      const shuffled = shuffle([...activeNames]);
       const groups = Array.from({ length: groupCount }, () => []);
 
-      // distribute names evenly across groups
       shuffled.forEach((name, index) => {
         groups[index % groupCount].push(name);
       });
