@@ -44,12 +44,12 @@
       gap: 10px;
     }
     .name-item {
-      background-color: #444;
       padding: 5px 10px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 5px;
+      cursor: default;
     }
     .name-item button {
       background-color: red;
@@ -60,6 +60,14 @@
       padding: 2px 6px;
       font-size: 12px;
     }
+    .active {
+      background-color: #444;
+    }
+    .removed {
+      background-color: #666;
+      color: #aaa;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -69,10 +77,11 @@
   <div id="menu"></div>
 
   <script>
-    let names = ["Felix H", "Felix T", "mads", "william", "nord", "asit", "valentin", "marius", "emil L", "Emil N", "tristan", "elias", "lias", "sigurd", "parsa", "berat", "mie", "emma", "gema", "irusa", "isabella", "liah", "enisa", "keyla", "melek"];
-    let availableNames = [...names];
+    const names = ["Felix H", "Felix T", "mads", "william", "nord", "asit", "valentin", "marius", "emil L", "Emil N", "tristan", "elias", "lias", "sigurd", "parsa", "berat", "mie", "emma", "gema", "irusa", "isabella", "liah", "enisa", "keyla", "melek"];
+    let removedNames = [];
 
     function pickName() {
+      const availableNames = names.filter(n => !removedNames.includes(n));
       if (availableNames.length === 0) {
         document.getElementById("name").textContent = "No names left!";
         return;
@@ -82,21 +91,37 @@
     }
 
     function removeName(name) {
-      availableNames = availableNames.filter(n => n !== name);
+      if (!removedNames.includes(name)) {
+        removedNames.push(name);
+        renderMenu();
+      }
+    }
+
+    function undoRemove(name) {
+      removedNames = removedNames.filter(n => n !== name);
       renderMenu();
     }
 
     function renderMenu() {
       const menu = document.getElementById("menu");
       menu.innerHTML = "";
-      availableNames.forEach(name => {
+      names.forEach(name => {
         const div = document.createElement("div");
-        div.className = "name-item";
-        div.textContent = name;
-        const btn = document.createElement("button");
-        btn.textContent = "Remove";
-        btn.onclick = () => removeName(name);
-        div.appendChild(btn);
+        if (removedNames.includes(name)) {
+          div.className = "name-item removed";
+          div.textContent = name;
+          div.onclick = () => undoRemove(name);
+        } else {
+          div.className = "name-item active";
+          div.textContent = name;
+          const btn = document.createElement("button");
+          btn.textContent = "Remove";
+          btn.onclick = (e) => { 
+            e.stopPropagation(); // prevent triggering div click
+            removeName(name);
+          };
+          div.appendChild(btn);
+        }
         menu.appendChild(div);
       });
     }
