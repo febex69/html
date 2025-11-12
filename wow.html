@@ -13,14 +13,14 @@
       color: white;
       font-family: Arial, sans-serif;
       margin: 0;
-      display: flex;
-      flex-direction: column;
+      display: block;
       min-height: 100vh;
     }
-    .content {
-      flex: 1 0 auto; /* content grows but does not push menu off-screen */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
       text-align: center;
-      padding: 50px 20px 20px 20px;
     }
     button.pick {
       padding: 30px 60px;
@@ -34,19 +34,21 @@
     }
     #name {
       font-size: 28px;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
+      min-height: 34px; /* prevents content jump */
     }
     #menu {
-      flex-shrink: 0; /* do not shrink */
+      width: 100%;
       background-color: #222;
       padding: 10px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
       max-height: 200px;
       overflow-y: auto;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+      position: relative; /* normal flow */
     }
     .name-item {
       padding: 5px 10px;
@@ -55,6 +57,7 @@
       align-items: center;
       gap: 5px;
       font-size: 14px;
+      cursor: default;
     }
     .name-item button {
       background-color: red;
@@ -76,7 +79,7 @@
   </style>
 </head>
 <body>
-  <div class="content">
+  <div class="container">
     <button class="pick" onclick="pickName()">Pick a Name</button>
     <div id="name"></div>
   </div>
@@ -84,17 +87,18 @@
   <div id="menu"></div>
 
   <script>
-    const names = ["Felix H", "Felix T", "mads", "william", "nord", "asit", "valentin", "marius", "emil L", "Emil N", "tristan", "elias", "lias", "sigurd", "parsa", "berat", "mie", "emma", "gema", "irusa", "isabella", "liah", "enisa", "keyla", "melek"];
+    const names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
     let removedNames = [];
 
     function pickName() {
-      const availableNames = names.filter(n => !removedNames.includes(n));
-      if (availableNames.length === 0) {
-        document.getElementById("name").textContent = "No names left!";
+      const available = names.filter(n => !removedNames.includes(n));
+      const nameDisplay = document.getElementById("name");
+      if (available.length === 0) {
+        nameDisplay.textContent = "No names left!";
         return;
       }
-      const randomIndex = Math.floor(Math.random() * availableNames.length);
-      document.getElementById("name").textContent = availableNames[randomIndex];
+      const index = Math.floor(Math.random() * available.length);
+      nameDisplay.textContent = available[index];
     }
 
     function removeName(name) {
@@ -123,9 +127,9 @@
           div.textContent = name;
           const btn = document.createElement("button");
           btn.textContent = "Remove";
-          btn.onclick = (e) => { 
-            e.stopPropagation();
-            removeName(name);
+          btn.onclick = e => { 
+            e.stopPropagation(); 
+            removeName(name); 
           };
           div.appendChild(btn);
         }
