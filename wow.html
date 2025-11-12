@@ -50,12 +50,12 @@
     #menu {
       background: rgba(30, 30, 40, 0.95);
       backdrop-filter: blur(12px);
-      padding: 15px;
+      padding: 25px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      max-height: 220px;
+      gap: 15px;
+      max-height: 300px;
       overflow-y: auto;
       border-radius: 20px 20px 0 0;
       box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
@@ -63,12 +63,12 @@
       transition: all 0.3s ease;
     }
     .name-item {
-      padding: 8px 14px;
+      padding: 10px 16px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .name-item:hover {
@@ -81,8 +81,8 @@
       border-radius: 6px;
       color: white;
       cursor: pointer;
-      padding: 3px 7px;
-      font-size: 0.75rem;
+      padding: 4px 8px;
+      font-size: 0.85rem;
       transition: background 0.2s;
     }
     .name-item button:hover {
@@ -98,7 +98,6 @@
       50% { box-shadow: 0 0 15px #fff; transform: scale(1.1); }
       100% { box-shadow: 0 0 0px #fff; transform: scale(1); }
     }
-    /* Confetti particles */
     .confetti {
       position: absolute;
       width: 8px;
@@ -188,11 +187,11 @@
 
     function createConfetti() {
       const button = document.querySelector(".pick-button");
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 30; i++) {
         const conf = document.createElement("div");
         conf.classList.add("confetti");
         conf.style.setProperty('--x', `${Math.random()*200-100}px`);
-        conf.style.setProperty('--y', `${Math.random()*200-100}px`);
+        conf.style.setProperty('--y', `${Math.random()*200-200}px`);
         conf.style.setProperty('--r', `${Math.random()*360}deg`);
         button.appendChild(conf);
         setTimeout(() => conf.remove(), 1000);
