@@ -5,68 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Name Picker</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
       margin: 0;
-      display: block;
-      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
+      padding: 20px;
     }
-    button.pick {
-      padding: 30px 60px;
-      font-size: 24px;
-      background-color: green;
+    .pick-button {
+      background-color: #28a745;
       color: white;
       border: none;
       border-radius: 15px;
+      padding: 30px 60px;
+      font-size: 2rem;
       cursor: pointer;
-      margin-bottom: 20px;
+      transition: transform 0.2s, background 0.2s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .pick-button:hover {
+      background-color: #3cd153;
+      transform: scale(1.05);
     }
     #name {
-      font-size: 28px;
-      margin-bottom: 40px;
-      min-height: 34px; /* prevents content jump */
+      margin-top: 30px;
+      font-size: 3rem;
+      font-weight: bold;
+      min-height: 50px;
     }
     #menu {
-      width: 100%;
-      background-color: #222;
-      padding: 10px;
+      background: rgba(20, 20, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
-      position: relative; /* normal flow */
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -8px 20px rgba(0,0,0,0.5);
     }
     .name-item {
-      padding: 5px 10px;
+      padding: 8px 14px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 14px;
-      cursor: default;
+      font-size: 0.95rem;
+      transition: transform 0.2s;
+    }
+    .name-item:hover {
+      transform: scale(1.05);
     }
     .name-item button {
-      background-color: red;
+      background-color: #dc3545;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       color: white;
       cursor: pointer;
-      padding: 2px 6px;
-      font-size: 12px;
+      padding: 3px 7px;
+      font-size: 0.75rem;
+      transition: background 0.2s;
+    }
+    .name-item button:hover {
+      background-color: #ff5a69;
     }
     .active {
       background-color: #444;
@@ -79,8 +95,8 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="pick" onclick="pickName()">Pick a Name</button>
+  <div class="content">
+    <button class="pick-button" onclick="pickName()">Pick a Name</button>
     <div id="name"></div>
   </div>
 
@@ -92,13 +108,13 @@
 
     function pickName() {
       const available = names.filter(n => !removedNames.includes(n));
-      const nameDisplay = document.getElementById("name");
+      const display = document.getElementById("name");
       if (available.length === 0) {
-        nameDisplay.textContent = "No names left!";
+        display.textContent = "No names left!";
         return;
       }
       const index = Math.floor(Math.random() * available.length);
-      nameDisplay.textContent = available[index];
+      display.textContent = available[index];
     }
 
     function removeName(name) {
@@ -127,9 +143,9 @@
           div.textContent = name;
           const btn = document.createElement("button");
           btn.textContent = "Remove";
-          btn.onclick = e => { 
-            e.stopPropagation(); 
-            removeName(name); 
+          btn.onclick = e => {
+            e.stopPropagation();
+            removeName(name);
           };
           div.appendChild(btn);
         }
