@@ -1,165 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Group Generator</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  padding: 30px 10px;
+}
+h1 { font-size: 2.5rem; margin-bottom: 10px; }
+
+.controls {
+  background: rgba(30, 30, 40, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  width: 90%;
+  max-width: 650px;
+}
+
+#nameList {
+  background: rgba(255,255,255,0.1);
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 25px;
+  max-width: 600px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  text-align: left;
+}
+
+label { font-size: 1rem; display: flex; align-items: center; gap: 5px; }
+input[type="number"], input[type="text"], select {
+  padding: 10px 15px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: none;
+  text-align: center;
+}
+
+button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+button:hover { background-color: #3cd153; transform: scale(1.05); }
+
+#groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 30px;
+  padding-bottom: 30px;
+}
+
+.group {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+}
+.group:hover { transform: scale(1.03); }
+.group h2 { margin: 0 0 10px 0; color: #00ff9d; }
+.group ul { list-style: none; padding: 0; margin: 0; }
+.group li {
+  padding: 5px 10px;
+  margin: 3px 0;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  cursor: grab;
+}
+.group li.dragging { opacity: 0.5; }
+</style>
+</head>
+<body>
+<h1>🎲 Random Group Generator</h1>
+
+<div class="controls">
+  <label><b>Select Mode:</b></label>
+  <select id="modeSelect">
+    <option value="groupCount">Number of groups</option>
+    <option value="groupSize">People per group</option>
+    <option value="customPattern">Custom pattern (e.g. 4,4,5)</option>
+  </select>
+
+  <div id="presetArea" style="display:none;"></div>
+  <div id="inputArea"></div>
+</div>
+
+<div id="nameList"></div>
+<button onclick="generateGroups()">Generate Groups</button>
+<div id="groups"></div>
+
 <script>
-const presetPatterns = [
-  "4,4,5",
-  "3,3,3,3",
-  "5,5,5",
-  "2,2,2,2,2,2",
-  "6,6,6,6",
-  "4,4,4,4,4",
-  "3,4,4,4",
-  "2,3,3,4,4"
-];
+document.addEventListener("DOMContentLoaded", function() {
+  const presetPatterns = ["4,4,5","3,3,3,3","5,5,5","2,2,2,2,2,2","6,6,6,6","4,4,4,4,4","3,4,4,4","2,3,3,4,4"];
+  let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
 
-let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+  const nameListDiv = document.getElementById("nameList");
+  const modeSelect = document.getElementById("modeSelect");
+  const inputArea = document.getElementById("inputArea");
+  const presetArea = document.getElementById("presetArea");
+  const groupsContainer = document.getElementById("groups");
 
-const nameListDiv = document.getElementById("nameList");
-const modeSelect = document.getElementById("modeSelect");
-const inputArea = document.getElementById("inputArea");
-const presetArea = document.getElementById("presetArea");
-
-function renderNameList() {
-  nameListDiv.innerHTML = "";
-  names.forEach(name => {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = name;
-    checkbox.checked = true;
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(name));
-    nameListDiv.appendChild(label);
-  });
-}
-renderNameList();
-
-function getActiveNames() {
-  return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
-}
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-modeSelect.addEventListener("change", renderModeInput);
-renderModeInput();
-
-function renderModeInput() {
-  const mode = modeSelect.value;
-  inputArea.innerHTML = "";
-  presetArea.style.display = (mode === "customPattern") ? "block" : "none";
-
-  if (mode === "groupCount") {
-    presetArea.innerHTML = "";
-    inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
-  }
-  else if (mode === "groupSize") {
-    presetArea.innerHTML = "";
-    inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
-  }
-  else if (mode === "customPattern") {
-    presetArea.innerHTML =
-      `<label>Presets:</label><select id='presetSelect'>
-        ${presetPatterns.map(p => `<option value='${p}'>${p}</option>`).join('')}
-      </select>`;
-    inputArea.innerHTML =
-      `<label>Or write custom pattern (e.g. 4,4,5):</label>
-       <input id='patternInput' type='text' placeholder='4,4,5'>`;
-
-    document.getElementById("presetSelect").addEventListener('change', e => {
-      document.getElementById("patternInput").value = e.target.value;
+  function renderNameList() {
+    nameListDiv.innerHTML = "";
+    names.forEach(name => {
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = name;
+      checkbox.checked = true;
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(name));
+      nameListDiv.appendChild(label);
     });
   }
-}
+  renderNameList();
 
-function generateGroups() {
-  const mode = modeSelect.value;
-  const active = getActiveNames();
-  if (active.length === 0) return alert("Select at least one name!");
-
-  let groups = [];
-  const shuffled = shuffle([...active]);
-
-  if (mode === "groupCount") {
-    const count = parseInt(document.getElementById("groupCountInput").value);
-    groups = Array.from({ length: count }, () => []);
-    shuffled.forEach((name, i) => groups[i % count].push(name));
+  function getActiveNames() {
+    return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
   }
-  else if (mode === "groupSize") {
-    const size = parseInt(document.getElementById("groupSizeInput").value);
-    const groupCount = Math.ceil(shuffled.length / size);
-    groups = Array.from({ length: groupCount }, () => []);
-    shuffled.forEach((name, i) => groups[i % groupCount].push(name));
-  }
-  else if (mode === "customPattern") {
-    let patternText = document.getElementById("patternInput").value || document.getElementById("presetSelect").value;
-    let pattern = patternText.split(',').map(n => parseInt(n.trim()));
 
-    const totalPattern = pattern.reduce((a,b)=>a+b,0);
-    if (totalPattern < shuffled.length) {
-      let extra = shuffled.length - totalPattern;
-      let i = 0;
-      while(extra > 0){
-        pattern[i % pattern.length]++;
-        i++;
-        extra--;
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function renderModeInput() {
+    const mode = modeSelect.value;
+    inputArea.innerHTML = "";
+    presetArea.style.display = (mode === "customPattern") ? "block" : "none";
+
+    if (mode === "groupCount") {
+      presetArea.innerHTML = "";
+      inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
+    }
+    else if (mode === "groupSize") {
+      presetArea.innerHTML = "";
+      inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
+    }
+    else if (mode === "customPattern") {
+      presetArea.innerHTML =
+        `<label>Presets:</label><select id='presetSelect'>
+          ${presetPatterns.map(p => `<option value='${p}'>${p}</option>`).join('')}
+        </select>`;
+      inputArea.innerHTML =
+        `<label>Or write custom pattern (e.g. 4,4,5):</label>
+         <input id='patternInput' type='text' placeholder='4,4,5'>`;
+
+      document.getElementById("presetSelect").addEventListener('change', e => {
+        document.getElementById("patternInput").value = e.target.value;
+      });
+    }
+  }
+
+  modeSelect.addEventListener("change", renderModeInput);
+  renderModeInput();
+
+  function generateGroups() {
+    const mode = modeSelect.value;
+    const active = getActiveNames();
+    if (active.length === 0) return alert("Select at least one name!");
+
+    let groups = [];
+    const shuffled = shuffle([...active]);
+
+    if (mode === "groupCount") {
+      const count = parseInt(document.getElementById("groupCountInput").value);
+      groups = Array.from({ length: count }, () => []);
+      shuffled.forEach((name, i) => groups[i % count].push(name));
+    }
+    else if (mode === "groupSize") {
+      const size = parseInt(document.getElementById("groupSizeInput").value);
+      const groupCount = Math.ceil(shuffled.length / size);
+      groups = Array.from({ length: groupCount }, () => []);
+      shuffled.forEach((name, i) => groups[i % groupCount].push(name));
+    }
+    else if (mode === "customPattern") {
+      let patternText = document.getElementById("patternInput").value || document.getElementById("presetSelect").value;
+      let pattern = patternText.split(',').map(n => parseInt(n.trim()));
+      const totalPattern = pattern.reduce((a,b)=>a+b,0);
+      if (totalPattern < shuffled.length) {
+        let extra = shuffled.length - totalPattern;
+        let i = 0;
+        while(extra > 0){
+          pattern[i % pattern.length]++;
+          i++;
+          extra--;
+        }
       }
+      let idx = 0;
+      pattern.forEach(size => {
+        groups.push(shuffled.slice(idx, idx + size));
+        idx += size;
+      });
     }
 
-    let idx = 0;
-    pattern.forEach(size => {
-      groups.push(shuffled.slice(idx, idx + size));
-      idx += size;
+    renderGroups(groups);
+  }
+
+  function renderGroups(groups) {
+    groupsContainer.innerHTML = "";
+    groups.forEach((group, i) => {
+      const div = document.createElement("div");
+      div.className = "group";
+      const title = document.createElement("h2");
+      title.textContent = "Group " + (i + 1);
+      const ul = document.createElement("ul");
+
+      group.forEach(n => {
+        const li = document.createElement("li");
+        li.textContent = n;
+        li.draggable = true;
+
+        li.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("text/plain", e.target.textContent);
+          e.target.classList.add("dragging");
+        });
+        li.addEventListener("dragend", e => e.target.classList.remove("dragging"));
+        li.addEventListener("dragover", e => e.preventDefault());
+        li.addEventListener("drop", e => {
+          e.preventDefault();
+          const draggedName = e.dataTransfer.getData("text/plain");
+          const targetName = e.target.textContent;
+          e.target.textContent = draggedName;
+          const draggingEl = groupsContainer.querySelector(".dragging");
+          if(draggingEl) draggingEl.textContent = targetName;
+          draggingEl.classList.remove("dragging");
+        });
+
+        ul.appendChild(li);
+      });
+
+      div.appendChild(title);
+      div.appendChild(ul);
+      groupsContainer.appendChild(div);
     });
   }
 
-  renderGroups(groups);
-}
-
-function renderGroups(groups) {
-  const container = document.getElementById("groups");
-  container.innerHTML = "";
-
-  groups.forEach((group, i) => {
-    const div = document.createElement("div");
-    div.className = "group";
-    const title = document.createElement("h2");
-    title.textContent = "Group " + (i + 1);
-
-    const ul = document.createElement("ul");
-    group.forEach(n => {
-      const li = document.createElement("li");
-      li.textContent = n;
-      li.draggable = true;
-
-      li.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text/plain", e.target.textContent);
-        e.target.classList.add("dragging");
-      });
-      li.addEventListener("dragend", e => {
-        e.target.classList.remove("dragging");
-      });
-      li.addEventListener("dragover", e => e.preventDefault());
-      li.addEventListener("drop", e => {
-        e.preventDefault();
-        const draggedName = e.dataTransfer.getData("text/plain");
-        const targetName = e.target.textContent;
-
-        e.target.textContent = draggedName;
-        const draggingEl = container.querySelector(".dragging");
-        if(draggingEl) draggingEl.textContent = targetName;
-        draggingEl.classList.remove("dragging");
-      });
-
-      ul.appendChild(li);
-    });
-
-    div.appendChild(title);
-    div.appendChild(ul);
-    container.appendChild(div);
-  });
-}
+  window.generateGroups = generateGroups;
+});
 </script>
+
+</body>
+</html>
