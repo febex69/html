@@ -100,139 +100,143 @@
       <option value="customPattern">Custom pattern (e.g. 4,4,5)</option>
     </select>
 
+    <div id="presetArea" style="display:none;"></div>
     <div id="inputArea"></div>
-
-    <button onclick="generateGroups()">Generate Groups</button>
-  </div>
-
-  <div style="margin-bottom: 15px;">
-    <button onclick="toggleSelectAll()">Select / Unselect All</button>
   </div>
 
   <div id="nameList"></div>
-
-  <div style="margin: 20px 0; display:flex; gap:10px; justify-content:center;">
-    <input type="text" id="newName" placeholder="Add new name" />
-    <button onclick="addName()">Add</button>
-  </div>
-
+  <button onclick="generateGroups()">Generate Groups</button>
   <div id="groups"></div>
 
-  <footer>All changes reset on refresh — groups are random each time.</footer>
-
 <script>
-  let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
-  const nameListDiv = document.getElementById("nameList");
-  const modeSelect = document.getElementById("modeSelect");
-  const inputArea = document.getElementById("inputArea");
+const presetPatterns = [
+  "4,4,5",
+  "3,3,3,3",
+  "5,5,5",
+  "2,2,2,2,2,2",
+  "6,6,6,6",
+  "4,4,4,4,4",
+  "3,4,4,4",
+  "2,3,3,4,4"
+];
 
-  function renderNameList() {
-    nameListDiv.innerHTML = "";
-    names.forEach(name => {
-      const label = document.createElement("label");
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.value = name;
-      checkbox.checked = true;
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(name));
-      nameListDiv.appendChild(label);
+let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+
+const nameListDiv = document.getElementById("nameList");
+const modeSelect = document.getElementById("modeSelect");
+const inputArea = document.getElementById("inputArea");
+const presetArea = document.getElementById("presetArea");
+
+function renderNameList() {
+  nameListDiv.innerHTML = "";
+  names.forEach(name => {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = name;
+    checkbox.checked = true;
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(name));
+    nameListDiv.appendChild(label);
+  });
+}
+renderNameList();
+
+function getActiveNames() {
+  return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+modeSelect.addEventListener("change", renderModeInput);
+renderModeInput();
+
+function renderModeInput() {
+  const mode = modeSelect.value;
+  inputArea.innerHTML = "";
+  presetArea.style.display = (mode === "customPattern") ? "block" : "none";
+
+  if (mode === "groupCount") {
+    presetArea.innerHTML = "";
+    inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
+  }
+  else if (mode === "groupSize") {
+    presetArea.innerHTML = "";
+    inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
+  }
+  else if (mode === "customPattern") {
+    presetArea.innerHTML =
+      `<label>Presets:</label><select id='presetSelect'>
+        ${presetPatterns.map(p => `<option value='${p}'>${p}</option>`).join('')}
+      </select>`;
+    inputArea.innerHTML =
+      `<label>Or write custom pattern (e.g. 4,4,5):</label>
+       <input id='patternInput' type='text' placeholder='4,4,5'>`;
+
+    document.getElementById("presetSelect").addEventListener('change', e => {
+      document.getElementById("patternInput").value = e.target.value;
     });
   }
-  renderNameList();
+}
 
-  function toggleSelectAll() {
-    const boxes = nameListDiv.querySelectorAll("input[type='checkbox']");
-    const allChecked = Array.from(boxes).every(b => b.checked);
-    boxes.forEach(b => b.checked = !allChecked);
+function generateGroups() {
+  const mode = modeSelect.value;
+  const active = getActiveNames();
+  if (active.length === 0) return alert("Select at least one name!");
+
+  let groups = [];
+  const shuffled = shuffle([...active]);
+
+  if (mode === "groupCount") {
+    const count = parseInt(document.getElementById("groupCountInput").value);
+    groups = Array.from({ length: count }, () => []);
+    shuffled.forEach((name, i) => groups[i % count].push(name));
   }
-
-  function addName() {
-    const newName = document.getElementById("newName").value.trim();
-    if (!newName) return;
-    names.push(newName);
-    document.getElementById("newName").value = "";
-    renderNameList();
+  else if (mode === "groupSize") {
+    const size = parseInt(document.getElementById("groupSizeInput").value);
+    for (let i = 0; i < shuffled.length; i += size)
+      groups.push(shuffled.slice(i, i + size));
   }
-
-  function getActiveNames() {
-    return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
-  }
-
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  modeSelect.addEventListener("change", renderModeInput);
-  renderModeInput();
-
-  function renderModeInput() {
-    const mode = modeSelect.value;
-    inputArea.innerHTML = "";
-    if (mode === "groupCount") {
-      inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
-    } else if (mode === "groupSize") {
-      inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
-    } else if (mode === "customPattern") {
-      inputArea.innerHTML = `<label>Enter pattern (e.g. 4,4,5):</label><input id='patternInput' type='text' placeholder='4,4,5'>`;
-    }
-  }
-
-  function generateGroups() {
-    const mode = modeSelect.value;
-    const active = getActiveNames();
-    if (active.length === 0) return alert("Select at least one name!");
-
-    let groups = [];
-    const shuffled = shuffle([...active]);
-
-    if (mode === "groupCount") {
-      const count = parseInt(document.getElementById("groupCountInput").value);
-      groups = Array.from({ length: count }, () => []);
-      shuffled.forEach((name, i) => groups[i % count].push(name));
-
-    } else if (mode === "groupSize") {
-      const size = parseInt(document.getElementById("groupSizeInput").value);
-      for (let i = 0; i < shuffled.length; i += size) {
-        groups.push(shuffled.slice(i, i + size));
-      }
-
-    } else if (mode === "customPattern") {
-      const pattern = document.getElementById("patternInput").value.split(',').map(n => parseInt(n.trim()));
-      let idx = 0;
-      pattern.forEach(size => {
-        groups.push(shuffled.slice(idx, idx + size));
-        idx += size;
-      });
-      if (idx < shuffled.length) groups.push(shuffled.slice(idx));
-    }
-
-    renderGroups(groups);
-  }
-
-  function renderGroups(groups) {
-    const container = document.getElementById("groups");
-    container.innerHTML = "";
-    groups.forEach((group, i) => {
-      const div = document.createElement("div");
-      div.className = "group";
-      const title = document.createElement("h2");
-      title.textContent = "Group " + (i + 1);
-      const ul = document.createElement("ul");
-      group.forEach(n => {
-        const li = document.createElement("li");
-        li.textContent = n;
-        ul.appendChild(li);
-      });
-      div.appendChild(title);
-      div.appendChild(ul);
-      container.appendChild(div);
+  else if (mode === "customPattern") {
+    let patternText = document.getElementById("patternInput").value || document.getElementById("presetSelect").value;
+    const pattern = patternText.split(',').map(n => parseInt(n.trim()));
+    let idx = 0;
+    pattern.forEach(size => {
+      groups.push(shuffled.slice(idx, idx + size));
+      idx += size;
     });
+    if (idx < shuffled.length) groups.push(shuffled.slice(idx));
   }
+
+  renderGroups(groups);
+}
+
+function renderGroups(groups) {
+  const container = document.getElementById("groups");
+  container.innerHTML = "";
+  groups.forEach((group, i) => {
+    const div = document.createElement("div");
+    div.className = "group";
+    const title = document.createElement("h2");
+    title.textContent = "Group " + (i + 1);
+    const ul = document.createElement("ul");
+    group.forEach(n => {
+      const li = document.createElement("li");
+      li.textContent = n;
+      ul.appendChild(li);
+    });
+    div.appendChild(title);
+    div.appendChild(ul);
+    container.appendChild(div);
+  });
+}
 </script>
+
 </body>
 </html>
