@@ -1,4 +1,80 @@
 <script>
+const presetPatterns = [
+  "4,4,5",
+  "3,3,3,3",
+  "5,5,5",
+  "2,2,2,2,2,2",
+  "6,6,6,6",
+  "4,4,4,4,4",
+  "3,4,4,4",
+  "2,3,3,4,4"
+];
+
+let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+
+const nameListDiv = document.getElementById("nameList");
+const modeSelect = document.getElementById("modeSelect");
+const inputArea = document.getElementById("inputArea");
+const presetArea = document.getElementById("presetArea");
+
+function renderNameList() {
+  nameListDiv.innerHTML = "";
+  names.forEach(name => {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = name;
+    checkbox.checked = true;
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(name));
+    nameListDiv.appendChild(label);
+  });
+}
+renderNameList();
+
+function getActiveNames() {
+  return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+modeSelect.addEventListener("change", renderModeInput);
+renderModeInput();
+
+function renderModeInput() {
+  const mode = modeSelect.value;
+  inputArea.innerHTML = "";
+  presetArea.style.display = (mode === "customPattern") ? "block" : "none";
+
+  if (mode === "groupCount") {
+    presetArea.innerHTML = "";
+    inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
+  }
+  else if (mode === "groupSize") {
+    presetArea.innerHTML = "";
+    inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
+  }
+  else if (mode === "customPattern") {
+    presetArea.innerHTML =
+      `<label>Presets:</label><select id='presetSelect'>
+        ${presetPatterns.map(p => `<option value='${p}'>${p}</option>`).join('')}
+      </select>`;
+    inputArea.innerHTML =
+      `<label>Or write custom pattern (e.g. 4,4,5):</label>
+       <input id='patternInput' type='text' placeholder='4,4,5'>`;
+
+    document.getElementById("presetSelect").addEventListener('change', e => {
+      document.getElementById("patternInput").value = e.target.value;
+    });
+  }
+}
+
 function generateGroups() {
   const mode = modeSelect.value;
   const active = getActiveNames();
@@ -14,17 +90,16 @@ function generateGroups() {
   }
   else if (mode === "groupSize") {
     const size = parseInt(document.getElementById("groupSizeInput").value);
-    const groupCount = Math.ceil(shuffled.length / size); // avoid last group being too big
+    const groupCount = Math.ceil(shuffled.length / size);
     groups = Array.from({ length: groupCount }, () => []);
     shuffled.forEach((name, i) => groups[i % groupCount].push(name));
   }
   else if (mode === "customPattern") {
     let patternText = document.getElementById("patternInput").value || document.getElementById("presetSelect").value;
     let pattern = patternText.split(',').map(n => parseInt(n.trim()));
-    
+
     const totalPattern = pattern.reduce((a,b)=>a+b,0);
     if (totalPattern < shuffled.length) {
-      // evenly distribute remaining people
       let extra = shuffled.length - totalPattern;
       let i = 0;
       while(extra > 0){
@@ -73,7 +148,6 @@ function renderGroups(groups) {
         const draggedName = e.dataTransfer.getData("text/plain");
         const targetName = e.target.textContent;
 
-        // swap names
         e.target.textContent = draggedName;
         const draggingEl = container.querySelector(".dragging");
         if(draggingEl) draggingEl.textContent = targetName;
