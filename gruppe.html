@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Group Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Group Generator - Enhanced</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -19,11 +19,7 @@
       text-align: center;
       padding: 30px 10px;
     }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; }
 
     .controls {
       background: rgba(30, 30, 40, 0.9);
@@ -36,32 +32,8 @@
       align-items: center;
       gap: 15px;
       margin-bottom: 20px;
-    }
-
-    input[type="number"] {
-      padding: 10px 15px;
-      font-size: 1.2rem;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      width: 100px;
-      text-align: center;
-    }
-
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 15px;
-      padding: 15px 40px;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    }
-    button:hover {
-      background-color: #3cd153;
-      transform: scale(1.05);
+      width: 90%;
+      max-width: 650px;
     }
 
     #nameList {
@@ -76,13 +48,22 @@
       text-align: left;
     }
 
-    label {
-      font-size: 1rem;
+    label { font-size: 1rem; display: flex; align-items: center; gap: 5px; }
+    input[type="number"] { padding: 10px 15px; font-size: 1.2rem; border-radius: 10px; border: none; width: 100px; text-align: center; }
+    input[type="text"] { padding: 10px 15px; font-size: 1rem; border-radius: 10px; border: none; width: 200px; }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 15px 40px;
+      font-size: 1.2rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      transition: transform 0.2s, background 0.2s;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     }
+    button:hover { background-color: #3cd153; transform: scale(1.05); }
 
     #groups {
       display: grid;
@@ -101,56 +82,52 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       transition: transform 0.2s;
     }
-    .group:hover {
-      transform: scale(1.03);
-    }
+    .group:hover { transform: scale(1.03); }
 
-    .group h2 {
-      margin: 0 0 10px 0;
-      font-size: 1.3rem;
-      color: #00ff9d;
-    }
+    .group h2 { margin: 0 0 10px 0; color: #00ff9d; }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    li {
-      padding: 4px 0;
-      font-size: 1.1rem;
-      color: #fff;
-    }
-
-    footer {
-      color: #aaa;
-      margin-top: 20px;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
+    footer { color: #aaa; margin-top: 20px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
-  <h1>🎲 Random Group Generator</h1>
+  <h1>🎲 Random Group Generator (Enhanced)</h1>
 
   <div class="controls">
-    <label for="groupCount">Enter number of groups (1–25):</label>
-    <input id="groupCount" type="number" min="1" max="25" value="3">
+    <label><b>Select Mode:</b></label>
+    <select id="modeSelect">
+      <option value="groupCount">Number of groups</option>
+      <option value="groupSize">People per group</option>
+      <option value="customPattern">Custom pattern (e.g. 4,4,5)</option>
+    </select>
+
+    <div id="inputArea"></div>
+
     <button onclick="generateGroups()">Generate Groups</button>
   </div>
 
+  <div style="margin-bottom: 15px;">
+    <button onclick="toggleSelectAll()">Select / Unselect All</button>
+  </div>
+
   <div id="nameList"></div>
+
+  <div style="margin: 20px 0; display:flex; gap:10px; justify-content:center;">
+    <input type="text" id="newName" placeholder="Add new name" />
+    <button onclick="addName()">Add</button>
+  </div>
 
   <div id="groups"></div>
 
   <footer>All changes reset on refresh — groups are random each time.</footer>
 
-  <script>
-    const names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+<script>
+  let names = ["Felix H","Felix T","mads","william","nord","asit","valentin","marius","emil L","Emil N","tristan","elias","lias","sigurd","parsa","berat","mie","emma","gema","irusa","isabella","liah","enisa","keyla","melek"];
+  const nameListDiv = document.getElementById("nameList");
+  const modeSelect = document.getElementById("modeSelect");
+  const inputArea = document.getElementById("inputArea");
 
-    // Show all names with checkboxes
-    const nameListDiv = document.getElementById("nameList");
+  function renderNameList() {
+    nameListDiv.innerHTML = "";
     names.forEach(name => {
       const label = document.createElement("label");
       const checkbox = document.createElement("input");
@@ -161,62 +138,101 @@
       label.appendChild(document.createTextNode(name));
       nameListDiv.appendChild(label);
     });
+  }
+  renderNameList();
 
-    function getActiveNames() {
-      return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
+  function toggleSelectAll() {
+    const boxes = nameListDiv.querySelectorAll("input[type='checkbox']");
+    const allChecked = Array.from(boxes).every(b => b.checked);
+    boxes.forEach(b => b.checked = !allChecked);
+  }
+
+  function addName() {
+    const newName = document.getElementById("newName").value.trim();
+    if (!newName) return;
+    names.push(newName);
+    document.getElementById("newName").value = "";
+    renderNameList();
+  }
+
+  function getActiveNames() {
+    return Array.from(nameListDiv.querySelectorAll("input[type='checkbox']:checked")).map(c => c.value);
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
+    return array;
+  }
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
+  modeSelect.addEventListener("change", renderModeInput);
+  renderModeInput();
+
+  function renderModeInput() {
+    const mode = modeSelect.value;
+    inputArea.innerHTML = "";
+    if (mode === "groupCount") {
+      inputArea.innerHTML = `<label>Number of groups:</label><input id='groupCountInput' type='number' min='1' max='25' value='3'>`;
+    } else if (mode === "groupSize") {
+      inputArea.innerHTML = `<label>People per group:</label><input id='groupSizeInput' type='number' min='1' max='30' value='4'>`;
+    } else if (mode === "customPattern") {
+      inputArea.innerHTML = `<label>Enter pattern (e.g. 4,4,5):</label><input id='patternInput' type='text' placeholder='4,4,5'>`;
     }
+  }
 
-    function generateGroups() {
-      const groupCount = parseInt(document.getElementById("groupCount").value);
-      const activeNames = getActiveNames();
+  function generateGroups() {
+    const mode = modeSelect.value;
+    const active = getActiveNames();
+    if (active.length === 0) return alert("Select at least one name!");
 
-      if (activeNames.length === 0) {
-        alert("Please select at least one name!");
-        return;
+    let groups = [];
+    const shuffled = shuffle([...active]);
+
+    if (mode === "groupCount") {
+      const count = parseInt(document.getElementById("groupCountInput").value);
+      groups = Array.from({ length: count }, () => []);
+      shuffled.forEach((name, i) => groups[i % count].push(name));
+
+    } else if (mode === "groupSize") {
+      const size = parseInt(document.getElementById("groupSizeInput").value);
+      for (let i = 0; i < shuffled.length; i += size) {
+        groups.push(shuffled.slice(i, i + size));
       }
 
-      if (isNaN(groupCount) || groupCount < 1 || groupCount > 25) {
-        alert("Please enter a number between 1 and 25.");
-        return;
-      }
-
-      const shuffled = shuffle([...activeNames]);
-      const groups = Array.from({ length: groupCount }, () => []);
-
-      shuffled.forEach((name, index) => {
-        groups[index % groupCount].push(name);
+    } else if (mode === "customPattern") {
+      const pattern = document.getElementById("patternInput").value.split(',').map(n => parseInt(n.trim()));
+      let idx = 0;
+      pattern.forEach(size => {
+        groups.push(shuffled.slice(idx, idx + size));
+        idx += size;
       });
-
-      renderGroups(groups);
+      if (idx < shuffled.length) groups.push(shuffled.slice(idx));
     }
 
-    function renderGroups(groups) {
-      const container = document.getElementById("groups");
-      container.innerHTML = "";
-      groups.forEach((group, i) => {
-        const div = document.createElement("div");
-        div.className = "group";
-        const title = document.createElement("h2");
-        title.textContent = "Group " + (i + 1);
-        const ul = document.createElement("ul");
-        group.forEach(name => {
-          const li = document.createElement("li");
-          li.textContent = name;
-          ul.appendChild(li);
-        });
-        div.appendChild(title);
-        div.appendChild(ul);
-        container.appendChild(div);
+    renderGroups(groups);
+  }
+
+  function renderGroups(groups) {
+    const container = document.getElementById("groups");
+    container.innerHTML = "";
+    groups.forEach((group, i) => {
+      const div = document.createElement("div");
+      div.className = "group";
+      const title = document.createElement("h2");
+      title.textContent = "Group " + (i + 1);
+      const ul = document.createElement("ul");
+      group.forEach(n => {
+        const li = document.createElement("li");
+        li.textContent = n;
+        ul.appendChild(li);
       });
-    }
-  </script>
+      div.appendChild(title);
+      div.appendChild(ul);
+      container.appendChild(div);
+    });
+  }
+</script>
 </body>
 </html>
