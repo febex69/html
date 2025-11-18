@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Venner Chat</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg1:#0f0c29;--bg2:#302b63;--card:rgba(255,255,255,0.06);--accent:#00ff9d}
+body{margin:0;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.app{width:100%;max-width:980px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);display:grid;grid-template-columns:300px 1fr;gap:18px}
+.sidebar{background:var(--card);padding:12px;border-radius:12px}
+.brand{font-size:1.4rem;margin-bottom:8px;color:var(--accent)}
+.room-list{display:flex;flex-direction:column;gap:8px}
+.room{padding:10px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,0.03)}
+.room.active{background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03));border-color:rgba(0,255,157,0.12)}
+.user-section{margin-top:12px;display:flex;gap:8px}
+.input, .textarea{width:100%;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:#fff}
+.main{background:var(--card);padding:12px;border-radius:12px;display:flex;flex-direction:column;height:70vh}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.messages{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
+.message{max-width:70%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.03)}
+.message.me{margin-left:auto;background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03))}
+.meta{font-size:0.8rem;opacity:0.8;margin-bottom:6px}
+.controls{display:flex;gap:8px;margin-top:10px}
+.send-btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+.small{font-size:0.85rem;opacity:0.9}
+.toast{position:fixed;right:20px;bottom:20px;background:rgba(0,0,0,0.6);padding:10px 14px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">Venner Chat</div>
+    <div class="small">Rooms</div>
+    <div class="room-list" id="rooms"></div>
+
+    <div class="small" style="margin-top:12px">Din bruger</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="usernameInput" class="input" placeholder="Skriv dit navn" />
+      <button id="saveNameBtn" class="send-btn">Gem</button>
+    </div>
+
+    <div class="small" style="margin-top:12px">Opret rum</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="newRoomInput" class="input" placeholder="Rum navn" />
+      <button id="createRoomBtn" class="send-btn">+</button>
+    </div>
+
+    <div style="margin-top:14px" class="small">Indstillinger</div>
+    <label class="small"><input type="checkbox" id="persistToggle" checked /> Gem chat (localStorage)</label>
+    <button id="exportBtn" style="margin-top:8px" class="send-btn">Eksporter chat (.json)</button>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div>
+        <div id="roomTitle" style="font-weight:700;font-size:1.1rem">Vælg et rum</div>
+        <div id="roomInfo" class="small">Ingen beskeder endnu</div>
+      </div>
+      <div class="small" id="typingIndicator"></div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="controls">
+      <input id="messageInput" class="input" placeholder="Skriv en besked..." />
+      <button id="sendBtn" class="send-btn">Send</button>
+      <button id="botBtn" class="send-btn">Bot</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<script>
+// Simple client-only chat system. Works offline in browser, stores in localStorage if toggled.
+const defaultRooms = ['General','Gaming','Random'];
+let rooms = []; // {name, messages: [{id, user, text, time}]} 
+let currentRoom = null;
+let username = localStorage.getItem('vc_username') || '';
+const persist = () => document.getElementById('persistToggle').checked;
+
+// DOM refs
+const roomsDiv = document.getElementById('rooms');
+const messagesDiv = document.getElementById('messages');
+const roomTitle = document.getElementById('roomTitle');
+const roomInfo = document.getElementById('roomInfo');
+const usernameInput = document.getElementById('usernameInput');
+const saveNameBtn = document.getElementById('saveNameBtn');
+const newRoomInput = document.getElementById('newRoomInput');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const botBtn = document.getElementById('botBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+const exportBtn = document.getElementById('exportBtn');
+const toast = document.getElementById('toast');
+
+usernameInput.value = username;
+
+function showToast(t){ toast.textContent = t; toast.style.display='block'; setTimeout(()=>toast.style.display='none',2500); }
+
+function saveState(){ if(!persist()) return; localStorage.setItem('vc_rooms', JSON.stringify(rooms)); localStorage.setItem('vc_username', username); }
+function loadState(){ const r = localStorage.getItem('vc_rooms'); if(r){ rooms = JSON.parse(r); } else { rooms = defaultRooms.map(n=>({name:n,messages:[]})); } }
+
+function renderRooms(){ roomsDiv.innerHTML=''; rooms.forEach(r=>{
+  const el = document.createElement('div'); el.className='room'+(currentRoom===r.name?' active':''); el.textContent = r.name + ' ('+r.messages.length+')'; el.onclick = ()=>selectRoom(r.name);
+  roomsDiv.appendChild(el);
+}); }
+
+function selectRoom(name){ currentRoom = name; const room = rooms.find(r=>r.name===name);
+ roomTitle.textContent = name; roomInfo.textContent = room.messages.length + ' beskeder'; renderMessages(room.messages); renderRooms(); }
+
+function renderMessages(messages){ messagesDiv.innerHTML=''; if(messages.length===0){ messagesDiv.innerHTML='<div class="small" style="opacity:0.8">Ingen beskeder endnu. Start chatting!</div>'; return; }
+ messages.forEach(m=>{
+   const el = document.createElement('div'); el.className='message' + (m.user===username?' me':'');
+   const meta = document.createElement('div'); meta.className='meta'; meta.textContent = m.user + ' • ' + new Date(m.time).toLocaleTimeString();
+   const text = document.createElement('div'); text.textContent = m.text;
+   el.appendChild(meta); el.appendChild(text);
+   // context menu: edit & delete for own messages
+   if(m.user===username){ el.oncontextmenu = (e)=>{ e.preventDefault(); showEditMenu(m); } }
+   messagesDiv.appendChild(el);
+ }); messagesDiv.scrollTop = messagesDiv.scrollHeight; }
+
+function showEditMenu(message){ const newText = prompt('Rediger besked:', message.text); if(newText===null) return; message.text = newText; message.edited = true; saveState(); renderMessages(rooms.find(r=>r.name===currentRoom).messages); }
+
+function sendMessage(text, userName){ if(!currentRoom) return showToast('Vælg et rum først'); if(!text.trim()) return; const room = rooms.find(r=>r.name===currentRoom);
+ const msg = { id: Date.now()+Math.random(), user: userName || username || 'Guest', text: text, time: Date.now() };
+ room.messages.push(msg); saveState(); renderMessages(room.messages); renderRooms(); }
+
+sendBtn.onclick = ()=>{ sendMessage(messageInput.value); messageInput.value=''; }
+messageInput.addEventListener('keypress', e=>{ if(e.key==='Enter'){ sendBtn.click(); } else { // fake typing indicator to others
+  typingIndicator.textContent = '...' ; setTimeout(()=>typingIndicator.textContent='',700);
+ } });
+
+saveNameBtn.onclick = ()=>{ const v = usernameInput.value.trim(); if(!v) return showToast('Skriv et navn'); username = v; localStorage.setItem('vc_username', username); showToast('Navn gemt'); }
+
+createRoomBtn.onclick = ()=>{ const v = newRoomInput.value.trim(); if(!v) return; if(rooms.find(r=>r.name.toLowerCase()===v.toLowerCase())){ showToast('Rum findes allerede'); return;} rooms.push({name:v, messages:[]}); saveState(); renderRooms(); newRoomInput.value=''; }
+
+botBtn.onclick = ()=>{ if(!currentRoom) return showToast('Vælg et rum'); const replies = ['Haha nice','No way 😂','GG','What?!','Send proof']; sendMessage(replies[Math.floor(Math.random()*replies.length)], 'Bot'); }
+
+exportBtn.onclick = ()=>{ const data = JSON.stringify(rooms, null, 2); const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'chat_export.json'; a.click(); URL.revokeObjectURL(url); }
+
+// init
+loadState(); renderRooms(); if(rooms.length) selectRoom(rooms[0].name);
+
+// sample demo data if new
+if(rooms.every(r=>r.messages.length===0)){
+  rooms[0].messages.push({id:1,user:'Mads',text:'Hey, klar på game i aften?',time:Date.now()-1000*60*60});
+  rooms[0].messages.push({id:2,user:'Felix H',text:'Ja! Kl. 18?',time:Date.now()-1000*60*40});
+  saveState(); renderMessages(rooms[0].messages); renderRooms(); }
+
+</script>
+</body>
+</html>
