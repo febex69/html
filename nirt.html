@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Fun Generator</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 10px;
+  text-align: center;
+}
+h1 { font-size: 2.7rem; margin-bottom: 20px; }
+
+.container {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+button {
+  background-color: #00c3ff;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  margin: 10px 0;
+}
+button:hover { transform: scale(1.05); background-color: #37d4ff; }
+
+#output {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 15px;
+  font-size: 1.3rem;
+  min-height: 50px;
+}
+</style>
+</head>
+<body>
+<h1>Random Fun Generator</h1>
+<div class="container">
+  <p>Tryk på en knap og få en random udfordring, roast, compliment eller dare!</p>
+
+  <button onclick="randomChallenge()">Random Challenge</button>
+  <button onclick="randomRoast()">Random Roast</button>
+  <button onclick="randomCompliment()">Random Compliment</button>
+  <button onclick="randomDare()">Random Dare</button>
+
+  <div id="output"></div>
+</div>
+
+<script>
+const challenges = [
+  "Sig alfabetet baglæns så hurtigt du kan!",
+  "Tag 10 armbøjninger NU!",
+  "Syng den første sang der falder dig ind.",
+  "Byt profilbillede med en ven i 10 minutter.",
+  "Gem din telefon væk i 15 minutter!"
+];
+
+const roasts = [
+  "Du er som WiFi i skolen – du virker 10% af tiden.",
+  "Din aim er så dårlig at selv en stormtrooper ville grine.",
+  "Du har samme energi som en afladet powerbank.",
+  "Hvis dovenskab var en sport, ville du stadig tabe.",
+  "Du ligner en NPC der ikke har fået sin dialog opdateret."
+];
+
+const compliments = [
+  "Du er faktisk rimelig sej, selvom du ikke indrømmer det.",
+  "Du får alle til at grine – respekt for det.",
+  "Du kunne seriøst blive youtuber, du har vibe'en.",
+  "Du gør dine venners dag bedre end du tror.",
+  "Du har 100% main character energy i dag."
+];
+
+const dares = [
+  "Send en random emoji til den første person på Snapchat.",
+  "Ring til en ven og sig 'jeg har lavet rod'.",
+  "Skift dit navn i Messenger til noget dumt i 5 minutter.",
+  "Tal med en 'gammel mand' stemme resten af runden.",
+  "Lav en TikTok-dans (uden musik) foran dine venner!"
+];
+
+function randomChallenge() {
+  output.textContent = challenges[Math.floor(Math.random() * challenges.length)];
+}
+function randomRoast() {
+  output.textContent = roasts[Math.floor(Math.random() * roasts.length)];
+}
+function randomCompliment() {
+  output.textContent = compliments[Math.floor(Math.random() * compliments.length)];
+}
+function randomDare() {
+  output.textContent = dares[Math.floor(Math.random() * dares.length)];
+}
+</script>
+</body>
+</html>
