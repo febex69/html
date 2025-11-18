@@ -1,122 +1,74 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Venner Chat (Firebase)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venner Chat</title>
 <style>
-*{box-sizing:border-box}
-:root{--bg1:#0f0c29;--bg2:#302b63;--card:rgba(255,255,255,0.06);--accent:#00ff9d}
-body{margin:0;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.app{width:100%;max-width:980px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);display:grid;grid-template-columns:300px 1fr;gap:18px}
-.sidebar{background:var(--card);padding:12px;border-radius:12px}
-.brand{font-size:1.4rem;margin-bottom:8px;color:var(--accent)}
-.room-list{display:flex;flex-direction:column;gap:8px}
-.room{padding:10px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,0.03)}
-.room.active{background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03));border-color:rgba(0,255,157,0.12)}
-.input, .textarea{width:100%;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:#fff}
-.main{background:var(--card);padding:12px;border-radius:12px;display:flex;flex-direction:column;height:70vh}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.messages{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
-.message{max-width:70%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.03)}
-.message.me{margin-left:auto;background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03))}
-.meta{font-size:0.8rem;opacity:0.8;margin-bottom:6px}
-.controls{display:flex;gap:8px;margin-top:10px}
-.send-btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
-.small{font-size:0.85rem;opacity:0.9}
-.toast{position:fixed;right:20px;bottom:20px;background:rgba(0,0,0,0.6);padding:10px 14px;border-radius:8px}
+*{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63);color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;padding:20px} .app{width:100%;max-width:980px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:18px;padding:18px;display:grid;grid-template-columns:300px 1fr;gap:18px} .sidebar{background:rgba(255,255,255,0.06);padding:12px;border-radius:12px} .brand{font-size:1.4rem;margin-bottom:8px;color:#00ff9d} .room-list{display:flex;flex-direction:column;gap:8px} .room{padding:10px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,0.03)} .room.active{background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03));border-color:rgba(0,255,157,0.12)} .input, .textarea{width:100%;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:#fff} .main{background:rgba(255,255,255,0.06);padding:12px;border-radius:12px;display:flex;flex-direction:column;height:70vh} .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px} .messages{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:10px} .message{max-width:70%;padding:10px;border-radius:12px;background:rgba(255,255,255,0.03)} .message.me{margin-left:auto;background:linear-gradient(90deg, rgba(0,255,157,0.08), rgba(0,255,157,0.03))} .meta{font-size:0.8rem;opacity:0.8;margin-bottom:6px} .controls{display:flex;gap:8px;margin-top:10px} .send-btn{background:#00ff9d;border:none;padding:10px 14px;border-radius:10px;cursor:pointer} .small{font-size:0.85rem;opacity:0.9} .toast{position:fixed;right:20px;bottom:20px;background:rgba(0,0,0,0.6);padding:10px 14px;border-radius:8px}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar">
-    <div class="brand">Venner Chat (Live)</div>
-    <div class="small">Rooms</div>
-    <div class="room-list" id="rooms"></div>
-
-    <div class="small" style="margin-top:12px">Din bruger</div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <input id="usernameInput" class="input" placeholder="Skriv dit navn" />
-      <button id="saveNameBtn" class="send-btn">Gem</button>
-    </div>
-
-    <div class="small" style="margin-top:12px">Opret rum</div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <input id="newRoomInput" class="input" placeholder="Rum navn" />
-      <button id="createRoomBtn" class="send-btn">+</button>
-    </div>
-
-    <div style="margin-top:14px" class="small">Indstillinger</div>
-    <label class="small"><input type="checkbox" id="persistToggle" checked /> Gem lokalt også</label>
-    <button id="exportBtn" style="margin-top:8px" class="send-btn">Eksporter chat (.json)</button>
-
-    <hr style="opacity:0.06;margin-top:12px" />
-    <div class="small">Firebase konfiguration</div>
-    <div class="small" style="opacity:0.9;margin-top:6px">Indsæt din Firebase config i koden (se øverste kommentar) — ellers virker chatten ikke online.</div>
-  </div>
-
-  <div class="main">
-    <div class="header">
-      <div>
-        <div id="roomTitle" style="font-weight:700;font-size:1.1rem">Vælg et rum</div>
-        <div id="roomInfo" class="small">Ingen beskeder endnu</div>
-      </div>
-      <div class="small" id="typingIndicator"></div>
-    </div>
-
-    <div class="messages" id="messages"></div>
-
-    <div class="controls">
-      <input id="messageInput" class="input" placeholder="Skriv en besked..." />
-      <button id="sendBtn" class="send-btn">Send</button>
-      <button id="botBtn" class="send-btn">Bot</button>
-    </div>
-  </div>
+<div class="sidebar">
+<div class="brand">Venner Chat (Live)</div>
+<div class="small">Rooms</div>
+<div class="room-list" id="rooms"></div>
+<div class="small" style="margin-top:12px">Din bruger</div>
+<div style="display:flex;gap:8px;margin-top:8px">
+<input id="usernameInput" class="input" placeholder="Skriv dit navn" />
+<button id="saveNameBtn" class="send-btn">Gem</button>
 </div>
-
+<div class="small" style="margin-top:12px">Opret rum</div>
+<div style="display:flex;gap:8px;margin-top:8px">
+<input id="newRoomInput" class="input" placeholder="Rum navn" />
+<button id="createRoomBtn" class="send-btn">+</button>
+</div>
+<div style="margin-top:14px" class="small">Indstillinger</div>
+<label class="small"><input type="checkbox" id="persistToggle" checked /> Gem lokalt også</label>
+<button id="exportBtn" style="margin-top:8px" class="send-btn">Eksporter chat (.json)</button>
+</div>
+<div class="main">
+<div class="header">
+<div>
+<div id="roomTitle" style="font-weight:700;font-size:1.1rem">Vælg et rum</div>
+<div id="roomInfo" class="small">Ingen beskeder endnu</div>
+</div>
+<div class="small" id="typingIndicator"></div>
+</div>
+<div class="messages" id="messages"></div>
+<div class="controls">
+<input id="messageInput" class="input" placeholder="Skriv en besked..." />
+<button id="sendBtn" class="send-btn">Send</button>
+<button id="botBtn" class="send-btn">Bot</button>
+</div>
+</div>
+</div>
 <div id="toast" class="toast" style="display:none"></div>
 
-<!-- Firebase SDK (compat - nem at bruge i eksempelkode) -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<!--
-  1) Opret en Firebase-projekt: https://console.firebase.google.com/
-  2) Aktivér Realtime Database og sæt regler til test (for nu):
-     {
-       "rules": {
-         ".read": true,
-         ".write": true
-       }
-     }
-  3) Kopiér din Firebase config (apiKey, authDomain, databaseURL, projectId, osv.)
-  4) Erstat firebaseConfig-objektet nedenfor med din konfiguration.
-  5) Åbn denne fil i browseren — så virker chatten live for alle med samme databaseURL.
--->
-
 <script>
-// ======= Sæt din config her (erstat pladsholderne) ========
+// Din Firebase config
 const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME",
-  databaseURL: "REPLACE_ME", // vigtig
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME"
+  apiKey: "AIzaSyCrkec_NtOZlyrsFmkZjiH__U3bQ8vytf0",
+  authDomain: "chat-315be.firebaseapp.com",
+  databaseURL: "https://chat-315be-default-rtdb.firebaseio.com",
+  projectId: "chat-315be",
+  storageBucket: "chat-315be.firebasestorage.app",
+  messagingSenderId: "576350661164",
+  appId: "1:576350661164:web:6beef6b24efa684eb97f89",
+  measurementId: "G-GDN5V7YQ1F"
 };
-// ==========================================================
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// App state
-const defaultRooms = ['General','Gaming','Random'];
 let rooms = [];
 let currentRoom = null;
 let username = localStorage.getItem('vc_username') || '';
 
-// DOM refs
 const roomsDiv = document.getElementById('rooms');
 const messagesDiv = document.getElementById('messages');
 const roomTitle = document.getElementById('roomTitle');
@@ -134,77 +86,44 @@ const toast = document.getElementById('toast');
 
 usernameInput.value = username;
 
-function showToast(t){ toast.textContent = t; toast.style.display='block'; setTimeout(()=>toast.style.display='none',2500); }
+function showToast(t){ toast.textContent=t; toast.style.display='block'; setTimeout(()=>toast.style.display='none',2500); }
 
-function saveLocal(){ if(!document.getElementById('persistToggle').checked) return; localStorage.setItem('vc_rooms', JSON.stringify(rooms)); localStorage.setItem('vc_username', username); }
-function loadLocal(){ const r = localStorage.getItem('vc_rooms'); if(r){ rooms = JSON.parse(r); } else { rooms = defaultRooms.map(n=>({name:n,messages:[]})); } }
+function saveLocal(){ if(document.getElementById('persistToggle').checked){ localStorage.setItem('vc_rooms', JSON.stringify(rooms)); localStorage.setItem('vc_username', username); } }
 
 function renderRooms(){ roomsDiv.innerHTML=''; rooms.forEach(r=>{
-  const el = document.createElement('div'); el.className='room'+(currentRoom===r.name?' active':''); el.textContent = r.name + ' ('+(r.messageCount||0)+')'; el.onclick = ()=>selectRoom(r.name);
+  const el=document.createElement('div'); el.className='room'+(currentRoom===r.name?' active':''); el.textContent=r.name+' ('+(r.messageCount||0)+')'; el.onclick=()=>selectRoom(r.name);
   roomsDiv.appendChild(el);
 }); }
 
-function selectRoom(name){ currentRoom = name; roomTitle.textContent = name; roomInfo.textContent = 'Laster...'; renderRooms(); // subscribe to firebase path
-  const messagesRef = db.ref('rooms/' + encodeURIComponent(name) + '/messages');
-  messagesDiv.innerHTML = '<div class="small" style="opacity:0.8">Laster beskeder...</div>';
-  messagesRef.off(); // remove old listeners
-  messagesRef.on('child_added', snap => {
-    const m = snap.val(); appendMessage(m);
-  });
-  messagesRef.on('child_changed', snap => {
-    // TODO: handle edits
-  });
-  // message count
-  db.ref('rooms/' + encodeURIComponent(name) + '/messages').once('value').then(snap => {
-    const count = snap.numChildren(); roomInfo.textContent = count + ' beskeder';
-  });
+function selectRoom(name){ currentRoom=name; roomTitle.textContent=name; renderRooms(); messagesDiv.innerHTML='';
+  const messagesRef=db.ref('rooms/'+encodeURIComponent(name)+'/messages');
+  messagesRef.off(); messagesRef.on('child_added',snap=>{ appendMessage(snap.val()); });
 }
 
-function appendMessage(m){ // create dom
-  // prevent duplicates when loading local cache
-  const key = m.id || (m.user + '|' + m.time + '|' + m.text);
-  if(document.getElementById('msg-'+hashCode(key))) return;
-  const el = document.createElement('div'); el.className='message' + ((m.user===username)?' me':''); el.id = 'msg-'+hashCode(key);
-  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = m.user + ' • ' + new Date(m.time).toLocaleTimeString();
-  const text = document.createElement('div'); text.textContent = m.text + (m.edited ? ' (redigeret)' : '');
-  el.appendChild(meta); el.appendChild(text);
-  messagesDiv.appendChild(el); messagesDiv.scrollTop = messagesDiv.scrollHeight;
+function appendMessage(m){ const el=document.createElement('div'); el.className='message'+((m.user===username)?' me':'');
+const meta=document.createElement('div'); meta.className='meta'; meta.textContent=m.user+' • '+new Date(m.time).toLocaleTimeString();
+const text=document.createElement('div'); text.textContent=m.text; el.appendChild(meta); el.appendChild(text);
+messagesDiv.appendChild(el); messagesDiv.scrollTop=messagesDiv.scrollHeight; }
+
+function sendMessage(text){ if(!currentRoom) return showToast('Vælg et rum først'); if(!text.trim()) return;
+const msg={id:Date.now(),user:username||'Guest',text:text,time:Date.now()};
+db.ref('rooms/'+encodeURIComponent(currentRoom)+'/messages').push(msg);
 }
 
-function hashCode(str){ let h=0; for(let i=0;i<str.length;i++){ h = (h<<5)-h + str.charCodeAt(i); h |= 0; } return Math.abs(h);
-}
+sendBtn.onclick=()=>{ sendMessage(messageInput.value); messageInput.value=''; }
+messageInput.addEventListener('keypress',e=>{ if(e.key==='Enter'){ sendBtn.click(); } });
+saveNameBtn.onclick=()=>{ const v=usernameInput.value.trim(); if(!v) return showToast('Skriv et navn'); username=v; saveLocal(); showToast('Navn gemt'); }
 
-function sendMessage(text, userName){ if(!currentRoom) return showToast('Vælg et rum først'); if(!text.trim()) return;
-  const roomPath = 'rooms/' + encodeURIComponent(currentRoom) + '/messages';
-  const msg = { id: Date.now()+Math.random(), user: userName || username || 'Guest', text: text, time: Date.now() };
-  db.ref(roomPath).push(msg).then(()=>{ /* saved */ }).catch(err=>{ showToast('Kunne ikke sende: '+err.message); });
-}
+createRoomBtn.onclick=()=>{ const v=newRoomInput.value.trim(); if(!v) return; if(rooms.find(r=>r.name.toLowerCase()===v.toLowerCase())){ showToast('Rum findes allerede'); return; }
+rooms.push({name:v,messageCount:0}); saveLocal(); renderRooms(); db.ref('rooms/'+encodeURIComponent(v)).set({created:Date.now()}); newRoomInput.value=''; }
 
-sendBtn.onclick = ()=>{ sendMessage(messageInput.value); messageInput.value=''; }
-messageInput.addEventListener('keypress', e=>{ if(e.key==='Enter'){ sendBtn.click(); } else { typingIndicator.textContent = '...'; setTimeout(()=>typingIndicator.textContent='',700);} });
+botBtn.onclick=()=>{ if(!currentRoom) return; const replies=['Haha nice','No way 😂','GG','What?!','Send proof']; sendMessage(replies[Math.floor(Math.random()*replies.length)]); }
 
-saveNameBtn.onclick = ()=>{ const v = usernameInput.value.trim(); if(!v) return showToast('Skriv et navn'); username = v; localStorage.setItem('vc_username', username); showToast('Navn gemt'); }
+exportBtn.onclick=()=>{ const data=JSON.stringify(rooms,null,2); const blob=new Blob([data],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='chat_export.json'; a.click(); URL.revokeObjectURL(url); }
 
-createRoomBtn.onclick = ()=>{ const v = newRoomInput.value.trim(); if(!v) return; if(rooms.find(r=>r.name.toLowerCase()===v.toLowerCase())){ showToast('Rum findes allerede'); return;} rooms.push({name:v,messageCount:0}); saveLocal(); renderRooms(); newRoomInput.value=''; // create empty path in firebase
-  db.ref('rooms/' + encodeURIComponent(v)).set({ created: Date.now() }); }
-
-botBtn.onclick = ()=>{ if(!currentRoom) return showToast('Vælg et rum'); const replies = ['Haha nice','No way 😂','GG','What?!','Send proof']; sendMessage(replies[Math.floor(Math.random()*replies.length)], 'Bot'); }
-
-exportBtn.onclick = ()=>{ const data = JSON.stringify(rooms, null, 2); const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'chat_export.json'; a.click(); URL.revokeObjectURL(url); }
-
-// Listen for rooms list updates (simple approach: subscribe to /rooms keys)
-db.ref('rooms').on('value', snap => {
-  const obj = snap.val() || {};
-  const list = Object.keys(obj).map(k=>({ name: decodeURIComponent(k), messageCount: obj[k].messages ? Object.keys(obj[k].messages).length : 0 }));
-  // merge with localrooms
-  rooms = Array.from(new Map([...list.map(r=>[r.name,r]) , ...(rooms.map(r=>[r.name,r]))]).values());
-  if(rooms.length===0) rooms = defaultRooms.map(n=>({name:n,messageCount:0}));
-  renderRooms();
-});
-
-// init local
-loadLocal(); renderRooms(); if(rooms.length) selectRoom(rooms[0].name);
-
+// Load saved username
+if(username) usernameInput.value=username;
+renderRooms();
 </script>
 </body>
 </html>
