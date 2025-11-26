@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>namnam-is — Jobopslag</title>
+  <meta name="description" content="Velkommen til namnam-is — kom med i vores team! Åbnet fra jobopslaget.">
+  <style>
+    :root{ --brand:#1f8f4b; --accent:#f9b700; --bg:#f7fcf7; --text:#12221a }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial; margin:0; color:var(--text); background:var(--bg);}
+    .container{max-width:1000px;margin:32px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    .logo{width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#125a37);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+    h1{margin:0;font-size:28px}
+    p.lead{margin:10px 0 18px;color:#23493a}
+    .hero{background:white;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(18,36,24,0.06)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:white;padding:18px;border-radius:10px}
+    .tag{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(31,143,75,0.12);color:var(--brand);font-weight:600;font-size:13px}
+    ul.benefits{padding-left:18px;margin:0}
+    .cta{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--brand);color:white;padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(31,143,75,0.12)}
+    .small{font-size:13px;color:#4a6b56}
+    .refnote{background:#fffaf0;border-radius:8px;padding:10px;margin-top:12px;font-size:14px}
+    footer{margin-top:22px;text-align:center;color:#567359;font-size:13px}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:20px}
+    .modal{background:white;border-radius:12px;max-width:560px;width:100%;padding:18px}
+    label{display:block;margin-top:10px;font-size:13px}
+    input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6efe6;margin-top:6px}
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    .close{background:transparent;border:0;font-size:18px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">NI</div>
+      <div>
+        <h1>namnam-is</h1>
+        <div class="small">Isproduktion · Butik · Events</div>
+      </div>
+    </header>
+
+    <main class="hero" role="main" aria-labelledby="main-title">
+      <div class="grid">
+        <section>
+          <span class="tag" id="refTag">Via jobopslag</span>
+          <h2 id="main-title">Vi leder efter nye kolleger — er det dig?</h2>
+          <p class="lead">Tak fordi du klikkede på linket i jobopslaget. Hos <strong>namnam-is</strong> kombinerer vi håndværk, smag og fællesskab for at lave verdens bedste is. Vi har små teams i produktion, butik og event.</p>
+
+          <div class="card">
+            <h3>Hvorfor arbejde hos os?</h3>
+            <ul class="benefits">
+              <li>Fleksible arbejdstider og gode kolleger</li>
+              <li>Udvikling og træning i isfremstilling</li>
+              <li>Personalefordele og rabat på produkter</li>
+            </ul>
+            <div style="margin-top:12px" class="cta">
+              <button class="btn" id="applyBtn">Ansøg nu</button>
+              <button class="btn ghost" id="learnBtn">Læs jobbeskrivelse</button>
+            </div>
+            <div class="refnote" id="refNote">Du er landet her via et jobopslag — det hjælper os med at prioritere din ansøgning. Hvis linket indeholdt en kode eller reference, tilføj den i ansøgningsformularen.</div>
+          </div>
+
+          <div style="margin-top:16px" class="card">
+            <h3>Kontakt</h3>
+            <p class="small">Har du spørgsmål? Send en mail til <a href="mailto:jobs@namnam-is.dk">jobs@namnam-is.dk</a> eller ring <a href="tel:+4512345678">+45 12 34 56 78</a>.</p>
+          </div>
+        </section>
+
+        <aside>
+          <div class="card">
+            <h3>Åbne stillinger</h3>
+            <ul>
+              <li><strong>Butiksmedarbejder</strong> — deltid, weekend</li>
+              <li><strong>Isproducent</strong> — fuldtid, erfaring fordels
+              </li>
+              <li><strong>Eventmedarbejder</strong> — projektansættelse</li>
+            </ul>
+            <div style="margin-top:12px" class="small">Klik "Ansøg nu" for at sende en hurtig ansøgning. Vi kontakter hurtigst muligt.</div>
+          </div>
+
+          <div style="margin-top:14px" class="card">
+            <h3>Find os</h3>
+            <p class="small">Adresse: Isgade 5, 1000 København</p>
+            <div style="height:120px;background:#f2f9f2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#7aae7a">Kort (placeholder)</div>
+          </div>
+        </aside>
+      </div>
+
+      <section style="margin-top:18px">
+        <div class="card">
+          <h3>Om processen</h3>
+          <p class="small">Efter du indsender ansøgningen, gennemgår vi den og inviterer relevante kandidater til samtale. Husk at vedhæfte CV og eventuelt et par linjer om, hvorfor du vil arbejde hos namnam-is.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      © <span id="year"></span> namnam-is — <span class="small">Vi elsker is</span>
+    </footer>
+  </div>
+
+  <!-- Modal ansøgning -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="modalTitle">Ansøgning</h3>
+        <button class="close" id="closeModal" aria-label="Luk">✕</button>
+      </div>
+
+      <form id="applicationForm">
+        <input type="hidden" name="ref" id="refInput" value="jobopslag">
+        <label for="name">Navn</label>
+        <input id="name" name="name" required>
+
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" required>
+
+        <label for="position">Hvilken stilling søger du?</label>
+        <select id="position" name="position">
+          <option>Butiksmedarbejder</option>
+          <option>Isproducent</option>
+          <option>Eventmedarbejder</option>
+          <option>Andet</option>
+        </select>
+
+        <label for="message">Kort besked / motivation</label>
+        <textarea id="message" name="message" rows="4" placeholder="Skriv kort hvorfor du passer til stillingen..."></textarea>
+
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+          <button class="btn" type="submit">Send ansøgning</button>
+          <button type="button" class="btn ghost" id="cancel">Annuller</button>
+        </div>
+        <p class="small" style="margin-top:8px">Denne formular sender ikke rigtige data — du kan erstatte "onsubmit"-handleren med et API-kald til dit rekrutteringssystem.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Vis år
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const modal = document.getElementById('modal');
+    const applyBtn = document.getElementById('applyBtn');
+    const closeModal = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancel');
+
+    applyBtn.addEventListener('click',()=>{ modal.style.display='flex'; document.getElementById('name').focus(); });
+    closeModal.addEventListener('click',()=> modal.style.display='none');
+    cancelBtn.addEventListener('click',()=> modal.style.display='none');
+
+    // Læs query-parameter for at vise referral info (fx ?ref=jobopslag eller ?source=linkedin)
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref') || params.get('source') || 'jobopslag';
+    document.getElementById('refInput').value = ref;
+    document.getElementById('refTag').textContent = ref;
+    document.getElementById('refNote').textContent = `Du er landet her via: ${ref}. Angiv gerne referencen i ansøgningen.`;
+
+    // Læs ansøgning (frontend demo)
+    document.getElementById('applicationForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const data = new FormData(this);
+      // Demo: vis en bekræftelse
+      modal.style.display='none';
+      alert('Tak! Din ansøgning er modtaget (demo). Vi kontakter dig når vi har gennemset ansøgningerne.');
+    });
+
+    // Hvis brugeren kommer direkte fra jobopslaget, scroll lidt ned
+    if(ref.toLowerCase().includes('job')){
+      setTimeout(()=>{ window.scrollTo({top:140,behavior:'smooth'}); },120);
+    }
+  </script>
+</body>
+</html>
