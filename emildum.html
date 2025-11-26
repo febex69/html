@@ -2,89 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Mini Photoshop</title>
+<title>Ultimate Fun Image Presets</title>
 <style>
-body { margin:0; font-family:sans-serif; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-#topbar { background:#333; color:white; display:flex; align-items:center; padding:5px 10px; }
-#topbar button { margin-right:10px; padding:5px 10px; cursor:pointer; }
-#main { flex:1; display:flex; }
-#toolbar { width:60px; background:#222; display:flex; flex-direction:column; align-items:center; padding:5px; }
-#toolbar button { width:40px; height:40px; margin:5px; cursor:pointer; background:#444; color:white; border:none; font-size:14px; }
-#rightpanel { width:200px; background:#f0f0f0; padding:10px; display:flex; flex-direction:column; }
-#canvasContainer { flex:1; display:flex; justify-content:center; align-items:center; background:#888; }
-canvas { border:2px solid black; }
-label { margin-top:10px; }
+body {
+  margin:0;
+  font-family: 'Comic Sans MS', sans-serif;
+  background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100vh;
+}
+h1 {
+  margin:20px;
+  font-size:2em;
+  color:#fff;
+  text-shadow: 2px 2px 5px #000;
+}
+#canvasContainer {
+  background:#fff;
+  padding:10px;
+  border-radius:20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  margin-bottom:20px;
+}
+canvas {
+  border:5px solid #ff6f91;
+  border-radius:15px;
+  max-width:90vw;
+  max-height:70vh;
+}
+#controls {
+  margin-bottom:30px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:15px;
+}
+button {
+  padding:12px 20px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  color:white;
+  transition:all 0.2s;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+button:hover {
+  transform:scale(1.1);
+  box-shadow:0 8px 15px rgba(0,0,0,0.3);
+}
+#uploadBtn { background:#ff6f91; }
+#resetBtn { background:#6a4c93; }
+.preset { background:#ffa500; }
 </style>
 </head>
 <body>
 
-<div id="topbar">
-  <button onclick="document.getElementById('upload').click()">Upload</button>
-  <input type="file" id="upload" accept="image/*" style="display:none">
-  <button onclick="saveImage()">Save</button>
-  <button onclick="resetImage()">Reset</button>
-  <button onclick="undo()">Undo</button>
-  <button onclick="redo()">Redo</button>
+<h1>🎨 Ultimate Fun Presets</h1>
+
+<input type="file" id="upload" accept="image/*" style="display:none;">
+<div id="canvasContainer">
+  <canvas id="canvas" width="600" height="400"></canvas>
 </div>
 
-<div id="main">
-  <div id="toolbar">
-    <button onclick="setTool('lasso')">L</button>
-    <button onclick="setTool('magic')">M</button>
-    <button onclick="setTool('brush')">B</button>
-    <button onclick="setTool('eraser')">E</button>
-    <button onclick="setTool('smudge')">S</button>
-    <button onclick="setTool('clone')">C</button>
-    <button onclick="setDrawMode('circle')">○</button>
-    <button onclick="setDrawMode('rect')">▭</button>
-    <button onclick="setDrawMode('line')">／</button>
-    <button onclick="setDrawMode('free')">✎</button>
-  </div>
-
-  <div id="canvasContainer">
-    <canvas id="canvas" width="800" height="600"></canvas>
-  </div>
-
-  <div id="rightpanel">
-    <label>Color:</label>
-    <input type="color" id="color" value="#ff0000">
-    <label>Brush Size:</label>
-    <input type="range" id="size" min="1" max="50" value="5">
-    <label>Opacity:</label>
-    <input type="range" id="opacity" min="0" max="1" step="0.05" value="1">
-    <label>Effects:</label>
-    <button onclick="applyEffect('invert')">Invert</button>
-    <button onclick="applyEffect('grayscale')">Grayscale</button>
-    <button onclick="applyEffect('sepia')">Sepia</button>
-    <button onclick="applyEffect('pixelate')">Pixelate</button>
-    <button onclick="applyEffect('swirl')">Swirl</button>
-    <button onclick="applyEffect('bulge')">Bulge</button>
-    <button onclick="applyEffect('wave')">Wave</button>
-    <button onclick="applyEffect('mirror')">Mirror</button>
-    <button onclick="applyEffect('glitch')">Glitch</button>
-    <button onclick="applyEffect('huerotate')">Hue</button>
-    <button onclick="applyEffect('brightcontrast')">B/C</button>
-  </div>
+<div id="controls">
+  <button id="uploadBtn" onclick="document.getElementById('upload').click()">Upload Image</button>
+  <button class="preset" onclick="applyPreset('invert')">Invert</button>
+  <button class="preset" onclick="applyPreset('pixelate')">Pixelate</button>
+  <button class="preset" onclick="applyPreset('swirl')">Swirl</button>
+  <button class="preset" onclick="applyPreset('glitch')">Glitch</button>
+  <button class="preset" onclick="applyPreset('bulge')">Bulge</button>
+  <button class="preset" onclick="applyPreset('rainbow')">Rainbow Tint</button>
+  <button class="preset" onclick="applyPreset('sepia')">Sepia</button>
+  <button class="preset" onclick="applyPreset('grayscale')">Grayscale</button>
+  <button class="preset" onclick="applyPreset('posterize')">Posterize</button>
+  <button class="preset" onclick="applyPreset('neon')">Neon Glow</button>
+  <button class="preset" onclick="applyPreset('edges')">Edge Detect</button>
+  <button class="preset" onclick="applyPreset('rgbsplit')">RGB Split</button>
+  <button class="preset" onclick="applyPreset('vhs')">VHS Glitch</button>
+  <button class="preset" onclick="applyPreset('solarize')">Solarize</button>
+  <button class="preset" onclick="applyPreset('popart')">Pop Art</button>
+  <button id="resetBtn" onclick="resetImage()">Reset</button>
 </div>
 
 <script>
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d');
-let imgData=null;
-let originalData=null;
-let history=[],redoHistory=[];
-let vectorShapes=[];
-let tool=null;
-let drawMode=null;
-let drawing=false;
-let startX,startY;
-let color=document.getElementById('color').value;
-let brushSize=document.getElementById('size').value;
-let opacity=document.getElementById('opacity').value;
-let selectionMask=null;
-let cloneSource=null;
+let originalImage=null;
 
-// Upload image
 document.getElementById('upload').addEventListener('change',e=>{
   const file=e.target.files[0];
   if(file){
@@ -95,9 +104,7 @@ document.getElementById('upload').addEventListener('change',e=>{
         canvas.width=img.width>800?800:img.width;
         canvas.height=img.height>600?600:img.height;
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-        originalData=new ImageData(new Uint8ClampedArray(imgData.data),imgData.width,imgData.height);
-        saveHistory();
+        originalImage=ctx.getImageData(0,0,canvas.width,canvas.height);
       }
       img.src=event.target.result;
     }
@@ -105,103 +112,153 @@ document.getElementById('upload').addEventListener('change',e=>{
   }
 });
 
-// Toolbar
-function setTool(t){ tool=t; drawMode=null; }
-function setDrawMode(m){ drawMode=m; tool=null; }
-document.getElementById('color').addEventListener('change',e=>{ color=e.target.value; });
-document.getElementById('size').addEventListener('input',e=>{ brushSize=e.target.value; });
-document.getElementById('opacity').addEventListener('input',e=>{ opacity=e.target.value; });
+function applyPreset(type){
+  if(!originalImage) return;
+  const imgData=ctx.createImageData(originalImage);
+  imgData.data.set(originalImage.data);
+  const data=imgData.data;
+  const w=canvas.width,h=canvas.height;
 
-// Canvas Events
-canvas.addEventListener('mousedown',e=>{
-  startX=e.offsetX; startY=e.offsetY; drawing=true;
-  if(tool==='brush'||tool==='eraser'||tool==='smudge'||tool==='clone') saveHistory();
-  if(tool==='lasso') selectionMask=[{x:startX,y:startY}];
-  if(tool==='clone') cloneSource={x:startX,y:startY};
-});
-canvas.addEventListener('mousemove',e=>{
-  if(!drawing) return;
-  const x=e.offsetX; const y=e.offsetY;
-  if(drawMode){ redraw(); drawShape(drawMode,startX,startY,x,y,color); }
-  else if(tool==='brush'){ drawLine(startX,startY,x,y,color,brushSize,opacity); startX=x; startY=y; }
-  else if(tool==='eraser'){ drawLine(startX,startY,x,y,'rgba(0,0,0,1)',brushSize,1,true); startX=x; startY=y; }
-  else if(tool==='lasso'){ selectionMask.push({x,y}); redraw(); drawSelectionMask(); }
-  else if(tool==='smudge'){ smudgePixels(startX,startY,x,y,brushSize); startX=x; startY=y; }
-  else if(tool==='clone'){ clonePixels(cloneSource.x,cloneSource.y,x,y,brushSize); startX=x; startY=y; }
-});
-canvas.addEventListener('mouseup',e=>{ drawing=false; if(drawMode) vectorShapes.push({mode:drawMode,x:startX,y:startY,x2:e.offsetX,y2:e.offsetY,color}); if(tool==='lasso') drawSelectionMask(); });
-
-// Drawing functions
-function drawLine(x1,y1,x2,y2,col,size,opac,erase=false){
-  ctx.globalAlpha=opac;
-  ctx.strokeStyle=col;
-  ctx.lineWidth=size;
-  ctx.lineCap='round';
-  if(erase) ctx.globalCompositeOperation='destination-out'; else ctx.globalCompositeOperation='source-over';
-  ctx.beginPath();
-  ctx.moveTo(x1,y1);
-  ctx.lineTo(x2,y2);
-  ctx.stroke();
-  ctx.globalAlpha=1;
-  ctx.globalCompositeOperation='source-over';
-}
-function drawShape(mode,x1,y1,x2,y2,col){
-  ctx.strokeStyle=col;
-  ctx.lineWidth=3;
-  ctx.beginPath();
-  if(mode==='circle'){ const r=Math.hypot(x2-x1,y2-y1); ctx.arc(x1,y1,r,0,2*Math.PI); ctx.stroke(); }
-  else if(mode==='rect'){ ctx.rect(x1,y1,x2-x1,y2-y1); ctx.stroke(); }
-  else if(mode==='line'){ ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
-  else if(mode==='free'){ ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
-}
-
-// Selection mask
-function drawSelectionMask(){
-  if(!selectionMask) return;
-  ctx.strokeStyle='rgba(0,0,255,0.8)'; ctx.fillStyle='rgba(0,0,255,0.2)';
-  ctx.lineWidth=2; ctx.beginPath();
-  ctx.moveTo(selectionMask[0].x,selectionMask[0].y);
-  for(let i=1;i<selectionMask.length;i++) ctx.lineTo(selectionMask[i].x,selectionMask[i].y);
-  ctx.closePath(); ctx.fill(); ctx.stroke();
-}
-
-// Smudge
-function smudgePixels(x1,y1,x2,y2,size){
-  const data=ctx.getImageData(x1-size/2,y1-size/2,size,size);
-  ctx.putImageData(data,x2-size/2,y2-size/2);
-}
-// Clone
-function clonePixels(sx,sy,dx,dy,size){
-  const data=ctx.getImageData(sx-size/2,sy-size/2,size,size);
-  ctx.putImageData(data,dx-size/2,dy-size/2);
-}
-
-// Effects
-function applyEffect(effect){
-  if(!imgData) return;
-  saveHistory();
-  const data=ctx.getImageData(0,0,canvas.width,canvas.height);
-  for(let i=0;i<data.data.length;i+=4){
-    if(effect==='invert'){ data.data[i]=255-data.data[i]; data.data[i+1]=255-data.data[i+1]; data.data[i+2]=255-data.data[i+2]; }
-    else if(effect==='grayscale'){ let v=(data.data[i]+data.data[i+1]+data.data[i+2])/3; data.data[i]=data.data[i+1]=data.data[i+2]=v; }
-    else if(effect==='sepia'){ let r=data.data[i],g=data.data[i+1],b=data.data[i+2]; data.data[i]=Math.min(255,(r*0.393+g*0.769+b*0.189)); data.data[i+1]=Math.min(255,(r*0.349+g*0.686+b*0.168)); data.data[i+2]=Math.min(255,(r*0.272+g*0.534+b*0.131)); }
+  if(type==='invert'){
+    for(let i=0;i<data.length;i+=4){data[i]=255-data[i];data[i+1]=255-data[i+1];data[i+2]=255-data[i+2];}
   }
-  ctx.putImageData(data,0,0); imgData=data; redrawVectors();
+  else if(type==='pixelate'){
+    const size=10;
+    for(let y=0;y<h;y+=size){
+      for(let x=0;x<w;x+=size){
+        const i=(y*w+x)*4;
+        const r=data[i],g=data[i+1],b=data[i+2];
+        for(let yy=0;yy<size;yy++){
+          for(let xx=0;xx<size;xx++){
+            const j=((y+yy)*w+(x+xx))*4;
+            if(j<data.length){data[j]=r;data[j+1]=g;data[j+2]=b;}
+          }
+        }
+      }
+    }
+  }
+  else if(type==='swirl'){
+    const cx=w/2,cy=h/2;
+    const newData=new Uint8ClampedArray(data.length);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const dx=x-cx,dy=y-cy;
+        const r=Math.sqrt(dx*dx+dy*dy);
+        const angle=Math.atan2(dy,dx)+0.05*r;
+        const sx=Math.floor(cx+r*Math.cos(angle));
+        const sy=Math.floor(cy+r*Math.sin(angle));
+        const dest=(y*w+x)*4;
+        if(sx>=0 && sx<w && sy>=0 && sy<h){
+          const src=(sy*w+sx)*4;
+          newData[dest]=data[src];
+          newData[dest+1]=data[src+1];
+          newData[dest+2]=data[src+2];
+          newData[dest+3]=data[src+3];
+        }
+      }
+    }
+    imgData.data.set(newData);
+  }
+  else if(type==='glitch'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=data[i+4]||data[i];
+      data[i+1]=data[i+8]||data[i+1];
+      data[i+2]=data[i+12]||data[i+2];
+    }
+  }
+  else if(type==='bulge'){
+    const cx=w/2,cy=h/2,newData=new Uint8ClampedArray(data.length);
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const dx=(x-cx)/w*2,dy=(y-cy)/h*2;
+        const r=Math.sqrt(dx*dx+dy*dy);
+        const factor=1/(r+0.5);
+        const sx=Math.min(w-1,Math.max(0,Math.floor(cx+dx*factor*w/2)));
+        const sy=Math.min(h-1,Math.max(0,Math.floor(cy+dy*factor*h/2)));
+        const dest=(y*w+x)*4,src=(sy*w+sx)*4;
+        newData[dest]=data[src];newData[dest+1]=data[src+1];newData[dest+2]=data[src+2];newData[dest+3]=data[src+3];
+      }
+    }
+    imgData.data.set(newData);
+  }
+  else if(type==='rainbow'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=data[i]+Math.sin(i/100)*100;
+      data[i+1]=data[i+1]+Math.sin(i/50)*100;
+      data[i+2]=data[i+2]+Math.sin(i/25)*100;
+    }
+  }
+  else if(type==='sepia'){
+    for(let i=0;i<data.length;i+=4){
+      let r=data[i],g=data[i+1],b=data[i+2];
+      data[i]=Math.min(255,(r*0.393+g*0.769+b*0.189));
+      data[i+1]=Math.min(255,(r*0.349+g*0.686+b*0.168));
+      data[i+2]=Math.min(255,(r*0.272+g*0.534+b*0.131));
+    }
+  }
+  else if(type==='grayscale'){
+    for(let i=0;i<data.length;i+=4){
+      let v=(data[i]+data[i+1]+data[i+2])/3;
+      data[i]=data[i+1]=data[i+2]=v;
+    }
+  }
+  else if(type==='posterize'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=Math.floor(data[i]/64)*64;
+      data[i+1]=Math.floor(data[i+1]/64)*64;
+      data[i+2]=Math.floor(data[i+2]/64)*64;
+    }
+  }
+  else if(type==='neon'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=255-data[i];
+      data[i+1]=data[i+1]/2;
+      data[i+2]=255-data[i+2];
+    }
+  }
+  else if(type==='edges'){
+    for(let i=0;i<data.length;i+=4){
+      const avg=(data[i]+data[i+1]+data[i+2])/3;
+      const val=avg>128?255:0;
+      data[i]=data[i+1]=data[i+2]=val;
+    }
+  }
+  else if(type==='rgbsplit'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=data[i+4]||data[i];
+      data[i+1]=data[i+8]||data[i+1];
+      data[i+2]=data[i+12]||data[i+2];
+    }
+  }
+  else if(type==='vhs'){
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const i=(y*w+x)*4;
+        if(Math.random()<0.02){data[i]=0;data[i+1]=255;data[i+2]=0;}
+      }
+    }
+  }
+  else if(type==='solarize'){
+    for(let i=0;i<data.length;i+=4){
+      if(data[i]>128)data[i]=255-data[i];
+      if(data[i+1]>128)data[i+1]=255-data[i+1];
+      if(data[i+2]>128)data[i+2]=255-data[i+2];
+    }
+  }
+  else if(type==='popart'){
+    for(let i=0;i<data.length;i+=4){
+      data[i]=255-data[i]; data[i+1]=data[i+1]/2; data[i+2]=Math.min(255,data[i+2]+100);
+    }
+  }
+
+  ctx.putImageData(imgData,0,0);
 }
 
-// Vector redraw
-function redrawVectors(){
-  for(const shape of vectorShapes) drawShape(shape.mode,shape.x,shape.y,shape.x2,shape.y2,shape.color);
+function resetImage(){
+  if(originalImage){
+    ctx.putImageData(originalImage,0,0);
+  }
 }
-
-// Undo/Redo
-function saveHistory(){ if(imgData) history.push(ctx.getImageData(0,0,canvas.width,canvas.height)); if(history.length>50) history.shift(); }
-function undo(){ if(history.length>1){ redoHistory.push(history.pop()); ctx.putImageData(history[history.length-1],0,0); redrawVectors(); } }
-function redo(){ if(redoHistory.length>0){ const data=redoHistory.pop(); history.push(data); ctx.putImageData(data,0,0); redrawVectors(); } }
-
-// Reset/Save
-function resetImage(){ if(originalData){ imgData=new ImageData(new Uint8ClampedArray(originalData.data),originalData.width,originalData.height); ctx.putImageData(imgData,0,0); vectorShapes=[]; selectionMask=null; redrawVectors(); } }
-function saveImage(){ const link=document.createElement('a'); link.download='image.png'; link.href=canvas.toDataURL(); link.click(); }
 </script>
 
 </body>
