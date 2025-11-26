@@ -1,37 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Cumming</title>
+<meta charset="UTF-8">
+<title>Confetti Button</title>
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f0f0f0;
+  overflow: hidden;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+button {
+  padding: 20px 40px;
+  font-size: 24px;
+  cursor: pointer;
+  border: none;
+  background-color: #ff4081;
+  color: white;
+  border-radius: 10px;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(500px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.floating-text {
+  position: absolute;
+  font-size: 30px;
+  font-weight: bold;
+  color: #ff4081;
+  animation: floatUp 3s forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-300px); opacity: 0; }
+}
+</style>
 </head>
 <body>
-    <h1>About Cumming</h1>
 
-    <h2>What Happens When You Cum</h2>
-    <p>Ejaculation is the release of semen from the penis. It usually happens during sexual activity or masturbation. It involves both physical and mental processes.</p>
+<button onclick="shootConfetti()">Click Me!</button>
 
-    <h2>Physical Effects</h2>
-    <ul>
-        <li>Muscle contractions</li>
-        <li>Increased heart rate</li>
-        <li>Short-term energy release</li>
-        <li>Refractory period (time before you can ejaculate again)</li>
-    </ul>
+<script>
+function shootConfetti() {
+  // Create floating text
+  const text = document.createElement('div');
+  text.className = 'floating-text';
+  text.innerText = 'emildum';
+  text.style.left = window.innerWidth / 2 - 50 + 'px';
+  text.style.top = window.innerHeight / 2 - 50 + 'px';
+  document.body.appendChild(text);
+  setTimeout(() => text.remove(), 3000);
 
-    <h2>Mental Effects</h2>
-    <ul>
-        <li>Release of dopamine → feeling of reward</li>
-        <li>Release of prolactin → relaxation</li>
-        <li>Release of oxytocin → calmness or bonding</li>
-        <li>Temporary clarity or mental reset for some people</li>
-    </ul>
+  // Create confetti
+  for(let i=0; i<50; i++){
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = window.innerWidth/2 + Math.random()*200 - 100 + 'px';
+    confetti.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3000);
+  }
+}
+</script>
 
-    <h2>Notes</h2>
-    <p>The effects vary from person to person. Some feel energized afterward, some feel tired. There’s no long-term cognitive boost; the clarity people feel is mostly due to tension release.</p>
-
-    <footer>
-        <p>&copy; 2025 Information About Cumming</p>
-    </footer>
 </body>
 </html>
