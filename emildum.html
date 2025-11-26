@@ -2,86 +2,108 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Confetti Button</title>
+<title>Funny Image Editor</title>
 <style>
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: #f0f0f0;
-  overflow: hidden;
-  margin: 0;
   font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
 }
-
+canvas {
+  margin-top: 20px;
+  border: 2px solid black;
+}
 button {
-  padding: 20px 40px;
-  font-size: 24px;
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  border: none;
-  background-color: #ff4081;
-  color: white;
-  border-radius: 10px;
-}
-
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: red;
-  opacity: 0.8;
-  pointer-events: none;
-  animation: fall 3s linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(500px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-.floating-text {
-  position: absolute;
-  font-size: 30px;
-  font-weight: bold;
-  color: #ff4081;
-  animation: floatUp 3s forwards;
-}
-
-@keyframes floatUp {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-300px); opacity: 0; }
 }
 </style>
 </head>
 <body>
 
-<button onclick="shootConfetti()">Click Me!</button>
+<h1>Funny Image Editor</h1>
+<input type="file" id="upload" accept="image/*"><br>
+<canvas id="canvas" width="500" height="500"></canvas><br>
+
+<button onclick="invertColors()">Invert Colors</button>
+<button onclick="pixelate()">Pixelate</button>
+<button onclick="addScribbles()">Scribbles</button>
+<button onclick="randomTint()">Random Tint</button>
+<button onclick="resetImage()">Reset</button>
 
 <script>
-function shootConfetti() {
-  // Create floating text
-  const text = document.createElement('div');
-  text.className = 'floating-text';
-  text.innerText = 'emildum';
-  text.style.left = window.innerWidth / 2 - 50 + 'px';
-  text.style.top = window.innerHeight / 2 - 50 + 'px';
-  document.body.appendChild(text);
-  setTimeout(() => text.remove(), 3000);
+const upload = document.getElementById('upload');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
-  // Create confetti
-  for(let i=0; i<50; i++){
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti';
-    confetti.style.left = window.innerWidth/2 + Math.random()*200 - 100 + 'px';
-    confetti.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
-    document.body.appendChild(confetti);
-    setTimeout(() => confetti.remove(), 3000);
+let originalImage = null;
+
+upload.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(event){
+      const img = new Image();
+      img.onload = function(){
+        canvas.width = img.width > 500 ? 500 : img.width;
+        canvas.height = img.height > 500 ? 500 : img.height;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      }
+      img.src = event.target.result;
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+function invertColors(){
+  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+  for(let i=0;i<imageData.data.length;i+=4){
+    imageData.data[i] = 255 - imageData.data[i];       // R
+    imageData.data[i+1] = 255 - imageData.data[i+1];   // G
+    imageData.data[i+2] = 255 - imageData.data[i+2];   // B
+  }
+  ctx.putImageData(imageData,0,0);
+}
+
+function pixelate(){
+  const size = 10; // pixel size
+  const w = canvas.width;
+  const h = canvas.height;
+  const imageData = ctx.getImageData(0,0,w,h);
+  for(let y=0; y<h; y+=size){
+    for(let x=0; x<w; x+=size){
+      const i = ((y*w)+x)*4;
+      const r = imageData.data[i];
+      const g = imageData.data[i+1];
+      const b = imageData.data[i+2];
+      for(let yy=0; yy<size; yy++){
+        for(let xx=0; xx<size; xx++){
+          const j = ((y+yy)*w + (x+xx))*4;
+          imageData.data[j] = r;
+          imageData.data[j+1] = g;
+          imageData.data[j+2] = b;
+        }
+      }
+    }
+  }
+  ctx.putImageData(imageData,0,0);
+}
+
+function addScribbles(){
+  for(let i=0;i<50;i++){
+    ctx.strokeStyle = `hsl(${Math.random()*360},100%,50%)`;
+    ctx.lineWidth = Math.random()*5+1;
+    ctx.beginPath();
+    ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
+    ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
+    ctx.stroke();
   }
 }
-</script>
 
-</body>
-</html>
+function randomTint(){
+  const imageData = ctx.getIma
