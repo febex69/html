@@ -2,198 +2,190 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Crazy Funny Image Editor</title>
+<title>Mini Photoshop Browser Editor</title>
 <style>
-body {
-  font-family: sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px;
-}
-canvas {
-  margin-top: 20px;
-  border: 2px solid black;
-}
-button {
-  margin: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
+body { font-family:sans-serif; display:flex; flex-direction:column; align-items:center; margin:0; padding:0; }
+canvas { border:2px solid black; margin-top:10px; cursor: crosshair; }
+#toolbar { display:flex; flex-wrap:wrap; justify-content:center; margin:10px; }
+#toolbar button, #toolbar input[type=color], #toolbar input[type=range] { margin:5px; padding:8px 15px; font-size:14px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<h1>Crazy Funny Image Editor</h1>
+<h1>Mini Photoshop Browser Editor</h1>
 <input type="file" id="upload" accept="image/*"><br>
-<canvas id="canvas" width="500" height="500"></canvas><br>
 
-<!-- Funny effect buttons -->
-<button onclick="invertColors()">Invert Colors</button>
-<button onclick="pixelate()">Pixelate</button>
-<button onclick="addScribbles()">Scribbles</button>
-<button onclick="randomTint()">Random Tint</button>
-<button onclick="stretch()">Stretch</button>
-<button onclick="flip()">Flip Horizontally</button>
-<button onclick="swirl()">Swirl</button>
+<div id="toolbar">
+<!-- Vector -->
+<button onclick="setDrawMode('circle')">Circle</button>
+<button onclick="setDrawMode('rect')">Rect</button>
+<button onclick="setDrawMode('line')">Line</button>
+<button onclick="setDrawMode('free')">Freehand</button>
+<button onclick="eraseVector()">Erase Vectors</button>
+<input type="color" id="vectorColor" value="#ff0000">
+
+<!-- Selection -->
+<button onclick="setTool('lasso')">Lasso</button>
+<button onclick="setTool('magic')">Magic Wand</button>
+
+<!-- Painting -->
+<button onclick="setTool('brush')">Brush</button>
+<button onclick="setTool('eraser')">Eraser</button>
+<button onclick="setTool('smudge')">Smudge</button>
+<button onclick="setTool('clone')">Clone</button>
+
+<!-- Effects -->
+<button onclick="applyEffect('invert')">Invert</button>
+<button onclick="applyEffect('grayscale')">Grayscale</button>
+<button onclick="applyEffect('sepia')">Sepia</button>
+<button onclick="applyEffect('pixelate')">Pixelate</button>
+<button onclick="applyEffect('swirl')">Swirl</button>
+<button onclick="applyEffect('bulge')">Bulge</button>
+<button onclick="applyEffect('wave')">Wave</button>
+<button onclick="applyEffect('mirror')">Mirror</button>
+<button onclick="applyEffect('glitch')">Glitch</button>
+<button onclick="applyEffect('huerotate')">Hue Rotate</button>
+<button onclick="applyEffect('brightcontrast')">Brightness/Contrast</button>
+
+<!-- Undo / Reset -->
+<button onclick="undo()">Undo</button>
 <button onclick="resetImage()">Reset</button>
+</div>
+
+<canvas id="canvas" width="500" height="500"></canvas>
 
 <script>
-const upload = document.getElementById('upload');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let originalImage = null;
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+let originalData=null;
+let imgData=null;
+let history=[];
+let redoHistory=[];
+let vectorShapes=[];
+let drawMode=null;
+let tool=null;
+let drawing=false;
+let startX,startY;
+let color=document.getElementById('vectorColor').value;
+let selectionMask=null;
+let cloneSource=null;
 
-upload.addEventListener('change', (e) => {
-  const file = e.target.files[0];
+// Upload image
+document.getElementById('upload').addEventListener('change',e=>{
+  const file=e.target.files[0];
   if(file){
-    const reader = new FileReader();
-    reader.onload = function(event){
-      const img = new Image();
-      img.onload = function(){
-        // Fit image into canvas
-        const scale = Math.min(500/img.width, 500/img.height);
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const reader=new FileReader();
+    reader.onload=function(event){
+      const img=new Image();
+      img.onload=function(){
+        const scale=Math.min(500/img.width,500/img.height);
+        canvas.width=img.width*scale;
+        canvas.height=img.height*scale;
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+        originalData=ctx.getImageData(0,0,canvas.width,canvas.height);
+        saveHistory();
       }
-      img.src = event.target.result;
+      img.src=event.target.result;
     }
     reader.readAsDataURL(file);
   }
 });
 
-// Effects
-function invertColors(){
-  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  for(let i=0;i<imageData.data.length;i+=4){
-    imageData.data[i] = 255 - imageData.data[i];
-    imageData.data[i+1] = 255 - imageData.data[i+1];
-    imageData.data[i+2] = 255 - imageData.data[i+2];
+// History
+function saveHistory(){
+  if(imgData){
+    history.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    if(history.length>50) history.shift();
   }
-  ctx.putImageData(imageData,0,0);
 }
-
-function pixelate(){
-  const size = 10;
-  const w = canvas.width;
-  const h = canvas.height;
-  const imageData = ctx.getImageData(0,0,w,h);
-  for(let y=0; y<h; y+=size){
-    for(let x=0; x<w; x+=size){
-      const i = ((y*w)+x)*4;
-      const r = imageData.data[i];
-      const g = imageData.data[i+1];
-      const b = imageData.data[i+2];
-      for(let yy=0; yy<size; yy++){
-        for(let xx=0; xx<size; xx++){
-          const j = ((y+yy)*w + (x+xx))*4;
-          if(j < imageData.data.length){
-            imageData.data[j] = r;
-            imageData.data[j+1] = g;
-            imageData.data[j+2] = b;
-          }
-        }
-      }
-    }
+function undo(){
+  if(history.length>1){
+    redoHistory.push(history.pop());
+    imgData=history[history.length-1];
+    redraw();
   }
-  ctx.putImageData(imageData,0,0);
 }
-
-function addScribbles(){
-  for(let i=0;i<50;i++){
-    ctx.strokeStyle = `hsl(${Math.random()*360},100%,50%)`;
-    ctx.lineWidth = Math.random()*5+1;
-    ctx.beginPath();
-    ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
-    ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
-    ctx.stroke();
+function redo(){
+  if(redoHistory.length>0){
+    const data=redoHistory.pop();
+    history.push(data);
+    imgData=data;
+    redraw();
   }
 }
 
-function randomTint(){
-  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  const rTint = Math.random()*100;
-  const gTint = Math.random()*100;
-  const bTint = Math.random()*100;
-  for(let i=0;i<imageData.data.length;i+=4){
-    imageData.data[i] = Math.min(imageData.data[i]+rTint, 255);
-    imageData.data[i+1] = Math.min(imageData.data[i+1]+gTint, 255);
-    imageData.data[i+2] = Math.min(imageData.data[i+2]+bTint, 255);
+// Tools
+function setDrawMode(mode){ drawMode=mode; tool=null; color=document.getElementById('vectorColor').value; }
+function eraseVector(){ vectorShapes=[]; redraw(); }
+function setTool(t){ tool=t; drawMode=null; color=document.getElementById('vectorColor').value; }
+
+// Canvas mouse
+canvas.addEventListener('mousedown',e=>{
+  startX=e.offsetX; startY=e.offsetY; drawing=true;
+  if(tool==='brush'||tool==='eraser'||tool==='smudge'||tool==='clone') saveHistory();
+  if(tool==='lasso') selectionMask=[{x:startX,y:startY}];
+  if(tool==='clone') cloneSource={x:startX,y:startY};
+});
+canvas.addEventListener('mousemove',e=>{
+  if(!drawing) return;
+  const x=e.offsetX; const y=e.offsetY;
+  if(drawMode){ redraw(); ctx.strokeStyle=color; ctx.lineWidth=3; ctx.beginPath();
+    if(drawMode==='circle'){ ctx.arc(startX,startY,Math.hypot(x-startX,y-startY),0,2*Math.PI); ctx.stroke(); }
+    else if(drawMode==='rect'){ ctx.rect(startX,startY,x-startX,y-startY); ctx.stroke(); }
+    else if(drawMode==='line'){ ctx.moveTo(startX,startY); ctx.lineTo(x,y); ctx.stroke(); }
+    else if(drawMode==='free'){ ctx.moveTo(startX,startY); ctx.lineTo(x,y); ctx.stroke(); startX=x; startY=y; }
   }
-  ctx.putImageData(imageData,0,0);
+  else if(tool==='brush'){ ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(startX,startY); ctx.lineTo(x,y); ctx.stroke(); startX=x; startY=y; }
+  else if(tool==='eraser'){ ctx.strokeStyle='rgba(0,0,0,1)'; ctx.lineWidth=10; ctx.globalCompositeOperation='destination-out'; ctx.beginPath(); ctx.moveTo(startX,startY); ctx.lineTo(x,y); ctx.stroke(); ctx.globalCompositeOperation='source-over'; startX=x; startY=y; }
+  else if(tool==='lasso'){ selectionMask.push({x,y}); redraw(); drawSelectionMask(); }
+  else if(tool==='smudge'){ smudgePixels(startX,startY,x,y); startX=x; startY=y; }
+  else if(tool==='clone'){ clonePixels(cloneSource.x,cloneSource.y,x,y); startX=x; startY=y; }
+});
+canvas.addEventListener('mouseup',e=>{ drawing=false; if(drawMode) vectorShapes.push({mode:drawMode,color,x:startX,y:startY,x2:e.offsetX,y2:e.offsetY}); if(tool==='lasso') drawSelectionMask(); });
+
+// Redraw image + vectors
+function redraw(){
+  if(imgData) ctx.putImageData(imgData,0,0);
+  for(const shape of vectorShapes){
+    ctx.strokeStyle=shape.color; ctx.lineWidth=3; ctx.beginPath();
+    if(shape.mode==='circle'){ const r=Math.hypot(shape.x2-shape.x,shape.y2-shape.y); ctx.arc(shape.x,shape.y,r,0,2*Math.PI); ctx.stroke(); }
+    else if(shape.mode==='rect'){ ctx.rect(shape.x,shape.y,shape.x2-shape.x,shape.y2-shape.y); ctx.stroke(); }
+    else if(shape.mode==='line'){ ctx.moveTo(shape.x,shape.y); ctx.lineTo(shape.x2,shape.y2); ctx.stroke(); }
+    else if(shape.mode==='free'){ ctx.moveTo(shape.x,shape.y); ctx.lineTo(shape.x2,shape.y2); ctx.stroke(); }
+  }
 }
 
-function stretch(){
-  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  const stretched = ctx.createImageData(canvas.width, canvas.height);
-  for(let y=0; y<canvas.height; y++){
-    for(let x=0; x<canvas.width; x++){
-      const i = (y*canvas.width + x)*4;
-      const newX = Math.min(canvas.width-1, Math.floor(x + 20*Math.sin(y/20)));
-      const newY = Math.min(canvas.height-1, y);
-      const j = (newY*canvas.width + newX)*4;
-      stretched.data[j] = imageData.data[i];
-      stretched.data[j+1] = imageData.data[i+1];
-      stretched.data[j+2] = imageData.data[i+2];
-      stretched.data[j+3] = imageData.data[i+3];
-    }
-  }
-  ctx.putImageData(stretched,0,0);
+// Selection mask
+function drawSelectionMask(){
+  if(!selectionMask) return;
+  ctx.strokeStyle='rgba(0,0,255,0.8)'; ctx.fillStyle='rgba(0,0,255,0.2)'; ctx.lineWidth=2; ctx.beginPath();
+  ctx.moveTo(selectionMask[0].x,selectionMask[0].y);
+  for(let i=1;i<selectionMask.length;i++) ctx.lineTo(selectionMask[i].x,selectionMask[i].y);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
 }
 
-function flip(){
-  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  const flipped = ctx.createImageData(canvas.width, canvas.height);
-  for(let y=0; y<canvas.height; y++){
-    for(let x=0; x<canvas.width; x++){
-      const i = (y*canvas.width + x)*4;
-      const j = (y*canvas.width + (canvas.width-1-x))*4;
-      flipped.data[j] = imageData.data[i];
-      flipped.data[j+1] = imageData.data[i+1];
-      flipped.data[j+2] = imageData.data[i+2];
-      flipped.data[j+3] = imageData.data[i+3];
-    }
-  }
-  ctx.putImageData(flipped,0,0);
+// Simple smudge
+function smudgePixels(x1,y1,x2,y2){
+  const w=1; const h=1; const src=ctx.getImageData(x1-w/2,y1-h/2,w,h); ctx.putImageData(src,x2-w/2,y2-h/2);
 }
 
-function swirl(){
-  const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  const w = canvas.width;
-  const h = canvas.height;
-  const cx = w/2;
-  const cy = h/2;
-  const swirled = ctx.createImageData(w,h);
-  for(let y=0;y<h;y++){
-    for(let x=0;x<w;x++){
-      const dx = x - cx;
-      const dy = y - cy;
-      const r = Math.sqrt(dx*dx + dy*dy);
-      const angle = Math.atan2(dy, dx) + 0.05*r;
-      const sx = Math.floor(cx + r * Math.cos(angle));
-      const sy = Math.floor(cy + r * Math.sin(angle));
-      if(sx>=0 && sx<w && sy>=0 && sy<h){
-        const src = (sy*w + sx)*4;
-        const dest = (y*w + x)*4;
-        swirled.data[dest] = imageData.data[src];
-        swirled.data[dest+1] = imageData.data[src+1];
-        swirled.data[dest+2] = imageData.data[src+2];
-        swirled.data[dest+3] = imageData.data[src+3];
-      }
-    }
-  }
-  ctx.putImageData(swirled,0,0);
+// Simple clone
+function clonePixels(sx,sy,dx,dy){
+  const w=5; const h=5; const src=ctx.getImageData(sx,sy,w,h); ctx.putImageData(src,dx,dy);
 }
 
-function resetImage(){
-  if(originalImage){
-    ctx.putImageData(originalImage,0,0);
-  }
+// Effects (simplified example: invert)
+function applyEffect(effect){
+  if(!imgData) return;
+  saveHistory();
+  const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+  if(effect==='invert'){ for(let i=0;i<data.data.length;i+=4){ data.data[i]=255-data.data[i]; data.data[i+1]=255-data.data[i+1]; data.data[i+2]=255-data.data[i+2]; } }
+  ctx.putImageData(data,0,0); imgData=data; redraw();
 }
+
+// Reset
+function resetImage(){ if(originalData) imgData=new ImageData(new Uint8ClampedArray(originalData.data),originalData.width,originalData.height); vectorShapes=[]; selectionMask=null; redraw(); }
 </script>
-
 </body>
 </html>
