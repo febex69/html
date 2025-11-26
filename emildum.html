@@ -37,8 +37,8 @@
     }
 
     canvas {
-        max-width:90%;
-        max-height:90%;
+        width:80%;
+        height:auto;
         background:#111;
         border:3px solid #333;
         border-radius:10px;
@@ -72,7 +72,7 @@
     <input type="file" id="upload" class="btn">
 
     <h2>Funny Presets 😂</h2>
-    <button class="btn" onclick="addFilter('invert')">Inverted Reality</button>
+    <button class="btn" onclick="addFilter('invert(100%)')">Inverted Reality</button>
     <button class="btn" onclick="addFilter('blur(5px)')">Drunk Vision</button>
     <button class="btn" onclick="addFilter('contrast(300%)')">Super Contrast</button>
     <button class="btn" onclick="addFilter('brightness(300%)')">Heaven Glow</button>
@@ -89,13 +89,13 @@
     <h2>Artistic 🎭</h2>
     <button class="btn" onclick="addFilter('grayscale(100%)')">Black & White</button>
     <button class="btn" onclick="addFilter('sepia(100%)')">Vintage Old Photo</button>
-    <button class="btn" onclick="addFilter('contrast(250%) brightness(80%)')">Comic Strong Shadows</button>
+    <button class="btn" onclick="addFilter('contrast(250%) brightness(80%)')">Comic Shadows</button>
     <button class="btn" onclick="addFilter('blur(2px) brightness(120%)')">Soft Glow</button>
 
     <h2>Photo Enhancers 📸</h2>
     <button class="btn" onclick="addFilter('brightness(120%) contrast(130%)')">Better Lighting</button>
     <button class="btn" onclick="addFilter('saturate(120%) contrast(120%)')">Richer Colors</button>
-    <button class="btn" onclick="addFilter('brightness(90%) contrast(150%)')">Moody Cinema</button>
+    <button class="btn" onclick="addFilter('brightness(90%) contrast(150%)')">Cinema Mood</button>
 
     <h2>Stacking Tools</h2>
     <button class="btn" onclick="applyFilters()">Apply Filters</button>
@@ -121,23 +121,29 @@
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
             activeFilters = [];
+            canvas.style.filter = "none";
         }
     }
 
-    function addFilter(f) {
-        activeFilters.push(f);
-        updatePreview();
-    }
-
-    function updatePreview() {
+    function addFilter(filter) {
+        activeFilters.push(filter);
         canvas.style.filter = activeFilters.join(" ");
     }
 
     function applyFilters() {
-        ctx.filter = activeFilters.join(" ");
-        ctx.drawImage(canvas, 0, 0);
+        // Draw the filtered canvas onto itself (baking)
+        const temp = document.createElement("canvas");
+        temp.width = canvas.width;
+        temp.height = canvas.height;
+        const tctx = temp.getContext("2d");
+
+        tctx.filter = activeFilters.join(" ");
+        tctx.drawImage(canvas, 0, 0);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(temp, 0, 0);
+
         canvas.style.filter = "none";
-        ctx.filter = "none";
         activeFilters = [];
     }
 
