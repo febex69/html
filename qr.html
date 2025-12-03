@@ -3,307 +3,101 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="theme-color" content="#0b1220">
-<title>Velkommen ✦</title>
-<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<title>Artig eller Uartig?</title>
 <style>
-  /* --- Grundlæggende layout --- */
   :root{
-    --bg1:#0f1724; --bg2:#06101a; --glass: rgba(255,255,255,0.04);
-    --accent1:#7c3aed; --accent2:#06b6d4; --text:#e6f0ff;
+    --bg1:#0f1724; --bg2:#06101a;
+    --accent1:#7c3aed; --accent2:#06b6d4;
+    --text:#e6f0ff;
   }
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--text);-webkit-font-smoothing:antialiased}
+  html,body{
+    height:100%;margin:0;font-family:Inter,system-ui;
+    color:var(--text);-webkit-font-smoothing:antialiased;
+  }
   body{
-    display:grid;
-    place-items:center;
+    display:grid;place-items:center;padding:20px;
     background: radial-gradient(600px 400px at 10% 20%, rgba(124,58,237,0.12), transparent 6%),
                 radial-gradient(500px 300px at 90% 80%, rgba(6,182,212,0.08), transparent 6%),
                 linear-gradient(180deg,var(--bg1),var(--bg2));
-    padding:20px;
     overflow:auto;
   }
 
-  /* --- Kort container --- */
   .card{
-    width:100%;
-    max-width:420px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-    border-radius:18px;
-    padding:18px;
-    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-    border: 1px solid rgba(255,255,255,0.03);
-    backdrop-filter: blur(8px) saturate(120%);
-    transform-origin:center;
-    transition: transform .18s ease, box-shadow .18s ease;
+    width:100%;max-width:420px;padding:20px;
+    background:rgba(255,255,255,0.03);
+    border-radius:20px;border:1px solid rgba(255,255,255,0.04);
+    backdrop-filter:blur(8px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.45);
+    text-align:center;
   }
-  .card:active{ transform: scale(.998); }
 
-  /* --- Header --- */
-  .brand{
-    display:flex;align-items:center;gap:12px;
-  }
   .logo{
-    width:56px;height:56px;border-radius:12px;display:grid;place-items:center;
-    background: linear-gradient(135deg,var(--accent1),var(--accent2));
-    box-shadow: 0 6px 18px rgba(7,12,25,0.6), inset 0 -6px 18px rgba(255,255,255,0.06);
-    font-weight:700;color:white;font-size:20px;
+    width:60px;height:60px;border-radius:14px;margin:0 auto 12px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent1),var(--accent2));
+    font-size:26px;font-weight:700;color:white;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
   }
-  h1{margin:0;font-size:18px}
-  p.lead{margin:6px 0 0;color:rgba(230,240,255,0.86);font-size:13px}
 
-  /* --- Hero/illustration --- */
-  .hero{
-    display:flex;gap:12px;margin:14px 0 18px;align-items:center;
-  }
-  .wave{
-    flex:1;min-height:100px;display:grid;place-items:center;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-    border-radius:12px;padding:12px;
-  }
-  .big-title{font-size:20px;margin:0 0 6px}
-  .subtitle{font-size:13px;margin:0;color:#c9e3ff}
+  h1{margin:0;font-size:22px}
+  p{font-size:14px;color:#c7d7f0}
 
-  /* --- Knapper --- */
-  .row{display:flex;gap:10px;margin-top:8px}
+  input{
+    width:100%;padding:12px;border-radius:12px;
+    border:none;margin-top:14px;
+    background:rgba(255,255,255,0.08);
+    color:white;font-size:16px;
+  }
+
   .btn{
-    flex:1;padding:10px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));
-    color:white;font-weight:600;cursor:pointer;font-size:14px;
-    box-shadow:0 6px 18px rgba(124,58,237,0.18);
-  }
-  .btn.ghost{
-    background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);
-    box-shadow:none;font-weight:600;
-  }
-  .small{font-size:13px;padding:8px 10px}
-
-  /* --- Links & meta --- */
-  .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-  .chip{padding:8px 10px;border-radius:999px;background:var(--glass);font-size:13px;border:1px solid rgba(255,255,255,0.02);cursor:pointer}
-
-  /* --- Footer / helper --- */
-  footer{font-size:12px;color:#9fb7d8;margin-top:12px;text-align:center}
-
-  /* --- Mobile tweaks --- */
-  @media (max-width:420px){
-    .logo{width:48px;height:48px;font-size:18px}
-    .card{padding:14px}
+    margin-top:14px;width:100%;
+    padding:12px;border-radius:12px;border:none;
+    background:linear-gradient(90deg,var(--accent1),var(--accent2));
+    color:white;font-size:16px;font-weight:600;
+    cursor:pointer;
   }
 
-  /* --- Cool animated background elements --- */
-  .orbs{position:fixed;inset:0;pointer-events:none;z-index:0}
-  .orb{position:absolute;border-radius:50%;filter:blur(40px);opacity:.28;mix-blend-mode:screen}
-  .orb.a{width:420px;height:420px;left:-15%;top:-10%;background:linear-gradient(45deg,#7c3aed,#06b6d4)}
-  .orb.b{width:300px;height:300px;right:-10%;bottom:-5%;background:linear-gradient(45deg,#06b6d4,#7c3aed)}
-  /* small pulse */
-  @keyframes floaty {0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-18px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
-  .orb{animation: floaty 8s ease-in-out infinite}
-
-  /* subtle tilt on mouse move */
-  .card.tilt {
-    transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
-    box-shadow: 0 30px 80px rgba(2,6,23,0.7);
+  .result{
+    margin-top:20px;font-size:22px;font-weight:700;
   }
 
-  /* hidden for accessibility when JS disabled */
-  .js-only{display:none}
+  .nice{color:#4ade80;}
+  .naughty{color:#f87171;}
 </style>
 </head>
 <body>
-  <div class="orbs" aria-hidden="true">
-    <div class="orb a"></div>
-    <div class="orb b"></div>
-  </div>
 
-  <main class="card" role="main" aria-labelledby="main-title">
-    <div class="brand" role="banner">
-      <div class="logo" aria-hidden="true">✦</div>
-      <div>
-        <h1 id="main-title">Du fandt mig — velkommen!</h1>
-        <p class="lead">Scan QR. Dette er min mobile side — hurtig, enkel og lidt sej.</p>
-      </div>
-    </div>
+<div class="card">
+  <div class="logo">🎄</div>
+  <h1>Artig eller Uartig?</h1>
+  <p>Indtast dit navn og find ud af, om du er på julemandens artige liste... eller den uartige 👀</p>
 
-    <div class="hero" aria-hidden="false">
-      <div class="wave" id="wave">
-        <div style="text-align:center">
-          <p class="big-title" id="greeting">Hej — jeg er Felix (skift navn)</p>
-          <p class="subtitle" id="tagline">Klik på knapperne for at kontakte, gemme eller dele.</p>
-        </div>
-      </div>
-    </div>
+  <input id="nameInput" type="text" placeholder="Skriv dit navn...">
+  <button class="btn" id="checkBtn">Tjek min status</button>
 
-    <div class="row">
-      <button class="btn" id="visit-btn">Åbn mit hovedlink</button>
-      <button class="btn ghost small" id="contact-btn">Kontakt / vCard</button>
-    </div>
-
-    <div class="links" role="navigation" aria-label="links">
-      <div class="chip" id="copy-chip">Kopiér besked</div>
-      <div class="chip" id="share-chip">Del siden</div>
-      <div class="chip" id="secret-chip" title="Tryk for et easter egg">Tryk mig</div>
-    </div>
-
-    <footer>
-      Tip: tilføj til hjemmeskærm for at have den altid hurtig.
-    </footer>
-
-    <!-- skjult vCard/template -->
-    <template id="vcard-tpl">
-BEGIN:VCARD
-VERSION:3.0
-FN:Felix Q
-ORG:Mit firma
-TITLE:Kontakt
-TEL;TYPE=CELL:+45 12 34 56 78
-EMAIL:navn@eksempel.com
-URL:https://ditdomæne.example
-END:VCARD
-    </template>
-  </main>
+  <div class="result" id="result"></div>
+</div>
 
 <script>
-/* --- Grundlæggende funktionalitet (ingen eksterne libs) --- */
-(function(){
-  const visitBtn = document.getElementById('visit-btn');
-  const contactBtn = document.getElementById('contact-btn');
-  const copyChip = document.getElementById('copy-chip');
-  const shareChip = document.getElementById('share-chip');
-  const secretChip = document.getElementById('secret-chip');
-  const greeting = document.getElementById('greeting');
-  const tagline = document.getElementById('tagline');
-  const vcardTpl = document.getElementById('vcard-tpl').textContent.trim();
+document.getElementById("checkBtn").addEventListener("click", () => {
+  const name = document.getElementById("nameInput").value.trim();
+  const resultBox = document.getElementById("result");
 
-  // Tilpas disse værdier så siden viser dine egne links/info:
-  const MAIN_LINK = "https://example.com"; // Ændr til dit primære link
-  const COPY_TEXT = "Hej! Her er min side: " + MAIN_LINK;
-  const CONTACT_NAME = "Felix Q"; // Ændr navn
-  const CONTACT_PHONE = "+45 12 34 56 78"; // Ændr telefon
-  const CONTACT_EMAIL = "navn@eksempel.com"; // Ændr email
-
-  // Opdater UI-tekst dynamisk (valgfrit)
-  greeting.textContent = "Hej — jeg er " + CONTACT_NAME;
-  tagline.textContent = "Scanede du? Klik for mit link eller gem kontakt.";
-
-  // Besøg link
-  visitBtn.addEventListener('click', ()=> {
-    // åbn i nyt faneblad
-    window.open(MAIN_LINK, '_blank', 'noopener');
-  });
-
-  // Deling: Web Share API hvis muligt
-  shareChip.addEventListener('click', async () => {
-    if(navigator.share){
-      try{
-        await navigator.share({ title: CONTACT_NAME, text: COPY_TEXT, url: MAIN_LINK });
-      }catch(e){ /* bruger afbrød eller fejl */ }
-      return;
-    }
-    // fallback: kopier link
-    copyToClipboard(MAIN_LINK);
-    alert('Link kopieret til udklipsholder.');
-  });
-
-  // Kopiér besked
-  copyChip.addEventListener('click', ()=> {
-    copyToClipboard(COPY_TEXT);
-    copyChip.textContent = 'Kopieret ✓';
-    setTimeout(()=> copyChip.textContent = 'Kopiér besked', 1400);
-  });
-
-  // generér vCard og download
-  contactBtn.addEventListener('click', ()=> {
-    const vcard = [
-      "BEGIN:VCARD",
-      "VERSION:3.0",
-      "FN:" + CONTACT_NAME,
-      "TEL;TYPE=CELL:" + CONTACT_PHONE,
-      "EMAIL:" + CONTACT_EMAIL,
-      "URL:" + MAIN_LINK,
-      "END:VCARD"
-    ].join("\r\n");
-    const blob = new Blob([vcard], { type: 'text/vcard' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = (CONTACT_NAME.replace(/\s+/g,'_') || 'contact') + '.vcf';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=> URL.revokeObjectURL(url), 2000);
-  });
-
-  // easter egg
-  let secretCount = 0;
-  secretChip.addEventListener('click', ()=> {
-    secretCount++;
-    if(secretCount === 1) secretChip.textContent = 'Hmm...';
-    else if(secretCount === 3) { secretChip.textContent = '🎉 Overraskelse!'; revealConfetti(); }
-    else if(secretCount > 5) secretChip.textContent = 'Du fandt alle hemmelighederne!';
-  });
-
-  // Konverter tekst til udklipsholder
-  function copyToClipboard(text){
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).catch(()=> fallbackCopy(text));
-    } else fallbackCopy(text);
-  }
-  function fallbackCopy(text){
-    const t = document.createElement('textarea');
-    t.value = text; t.style.position='fixed'; t.style.left='-9999px';
-    document.body.appendChild(t); t.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    t.remove();
+  if(!name){
+    resultBox.innerHTML = "<span style='color:#f87171'>Skriv et navn først!</span>";
+    return;
   }
 
-  // Simpelt confetti (ingen lib)
-  function revealConfetti(){
-    const total = 40;
-    for(let i=0;i<total;i++){
-      const el = document.createElement('div');
-      el.style.position='fixed';
-      el.style.width='10px'; el.style.height='14px'; el.style.zIndex=9999;
-      el.style.left = (50 + (Math.random()-0.5)*60) + '%';
-      el.style.top = '-10%';
-      el.style.background = randomColor();
-      el.style.borderRadius = '2px';
-      el.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
-      el.style.opacity = '0.95';
-      document.body.appendChild(el);
-      const dur = 1500 + Math.random()*1200;
-      el.animate([
-        { transform: `translateY(0) rotate(0)`, opacity:1 },
-        { transform: `translateY(${60+Math.random()*80}vh) rotate(${400+Math.random()*800}deg)`, opacity:0.9 }
-      ], { duration: dur, easing:'cubic-bezier(.2,.7,.3,1)'});
-      setTimeout(()=> el.remove(), dur+100);
-    }
-  }
-  function randomColor(){
-    const palette = ['#7c3aed','#06b6d4','#f97316','#f43f5e','#10b981','#eab308'];
-    return palette[Math.floor(Math.random()*palette.length)];
-  }
+  // Random resultat — kan ændres til din egen liste
+  const isNice = Math.random() < 0.5;
 
-  // lille tilt-effekt (mouse på desktop)
-  const card = document.querySelector('.card');
-  let supportsPointer = window.matchMedia('(pointer:fine)').matches;
-  if(supportsPointer){
-    card.classList.add('js-only'); card.style.transition = 'transform .12s ease, box-shadow .12s ease';
-    document.body.addEventListener('mousemove', e => {
-      const rect = card.getBoundingClientRect();
-      const rx = (e.clientY - (rect.top + rect.height/2)) / rect.height * -8;
-      const ry = (e.clientX - (rect.left + rect.width/2)) / rect.width * 12;
-      card.style.setProperty('--rx', rx + 'deg');
-      card.style.setProperty('--ry', ry + 'deg');
-      card.classList.add('tilt');
-    });
-    document.body.addEventListener('mouseleave', ()=> {
-      card.classList.remove('tilt');
-      card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg');
-    });
+  if(isNice){
+    resultBox.innerHTML = `<span class="nice">🎁 ${name} er ARTIG i år!</span>`;
+  } else {
+    resultBox.innerHTML = `<span class="naughty">🔥 ${name} er UARTIG i år!</span>`;
   }
-
-  // Accessibility: focus outlines
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Tab') document.documentElement.style.setProperty('scroll-behavior','smooth');
-  });
-
-})();
+});
 </script>
+
 </body>
 </html>
