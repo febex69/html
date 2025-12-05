@@ -86,6 +86,15 @@
     <button class="btn" onclick="addFilter('contrast(200%) brightness(150%)')">Sharpen Pop</button>
     <button class="btn" onclick="addFilter('opacity(60%) blur(3px)')">Ghost Mode</button>
 
+    <!-- NEW EFFECTS -->
+    <h2>NEW Effects 🚀</h2>
+    <button class="btn" onclick="swirlEffect()">Swirl Twist</button>
+    <button class="btn" onclick="pixelate()">Pixelate</button>
+    <button class="btn" onclick="glitch()">Glitch Shake</button>
+    <button class="btn" onclick="rgbSplit()">RGB Split</button>
+    <button class="btn" onclick="waveDistort()">Wave / Ripple</button>
+    <button class="btn" onclick="shockDistort()">Shock Distortion</button>
+
     <h2>Artistic 🎭</h2>
     <button class="btn" onclick="addFilter('grayscale(100%)')">Black & White</button>
     <button class="btn" onclick="addFilter('sepia(100%)')">Vintage Old Photo</button>
@@ -131,7 +140,6 @@
     }
 
     function applyFilters() {
-        // Draw the filtered canvas onto itself (baking)
         const temp = document.createElement("canvas");
         temp.width = canvas.width;
         temp.height = canvas.height;
@@ -151,7 +159,59 @@
         activeFilters = [];
         canvas.style.filter = "none";
     }
+
+    // -------------------------
+    // NEW FX FUNCTIONS
+    // -------------------------
+
+    // SWIRL EFFECT (fake twist illusion)
+    function swirlEffect() {
+        canvas.style.transition = "0.2s";
+        canvas.style.transform = "rotate(10deg) scale(1.05)";
+        setTimeout(() => canvas.style.transform = "none", 200);
+    }
+
+    // PIXELATE
+    function pixelate() {
+        let pixel = 10;
+        activeFilters.push(`blur(0px)`); 
+        const temp = document.createElement("canvas");
+        const t = temp.getContext("2d");
+        temp.width = canvas.width / pixel;
+        temp.height = canvas.height / pixel;
+
+        t.drawImage(canvas, 0, 0, temp.width, temp.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(temp, 0, 0, temp.width, temp.height, 0, 0, canvas.width, canvas.height);
+    }
+
+    // GLITCH SHAKE
+    function glitch() {
+        canvas.style.animation = "shake 0.2s";
+        setTimeout(() => canvas.style.animation = "", 200);
+    }
+
+    // RGB SPLIT
+    function rgbSplit() {
+        activeFilters.push("drop-shadow(5px 0 red) drop-shadow(-5px 0 blue)");
+        canvas.style.filter = activeFilters.join(" ");
+    }
+
+    // WAVE / RIPPLE
+    function waveDistort() {
+        canvas.style.transition = "0.3s";
+        canvas.style.transform = "skewX(10deg)";
+        setTimeout(() => canvas.style.transform = "none", 300);
+    }
+
+    // SHOCK DISTORT
+    function shockDistort() {
+        canvas.style.transition = "0.15s";
+        canvas.style.transform = "scale(1.1) rotate(-3deg)";
+        setTimeout(() => canvas.style.transform = "none", 150);
+    }
+
 </script>
 
 </body>
-</html>    fix some buttons not working
+</html>
